@@ -1,4 +1,3 @@
-
 "use client";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -58,8 +57,10 @@ export function CreateAccountDrawer({ children }) {
     await createAccountFn(data);
   };
 
+  // ✅ FIX: Check newAccount?.success instead of just newAccount
+  // This prevents false triggers and ensures instant close on success
   useEffect(() => {
-    if (newAccount) {
+    if (newAccount?.success) {
       toast.success("Account created successfully");
       reset();
       setOpen(false);
@@ -72,14 +73,17 @@ export function CreateAccountDrawer({ children }) {
     }
   }, [error]);
 
+  // Reset form when drawer closes
+  const handleOpenChange = (val) => {
+    if (!val) reset();
+    setOpen(val);
+  };
+
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
 
-      {/* Drawer Content — white bg in light, dark navy in dark */}
       <DrawerContent className="bg-white dark:bg-[hsl(220,20%,8%)] border-t border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)]">
-
-        {/* Header */}
         <DrawerHeader>
           <DrawerTitle className="text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] text-lg font-semibold">
             Create New Account
@@ -93,20 +97,18 @@ export function CreateAccountDrawer({ children }) {
             <div className="space-y-2">
               <label
                 htmlFor="name"
-                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none"
               >
                 Account Name
               </label>
               <Input
                 id="name"
                 placeholder="e.g., Main Checking"
-                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] placeholder:text-[hsl(215,20%,40%)] dark:placeholder:text-[hsl(215,20%,65%)] focus-visible:ring-[hsl(217,91%,60%)]"
+                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] focus-visible:ring-[hsl(217,91%,60%)]"
                 {...register("name")}
               />
               {errors.name && (
-                <p className="text-sm text-[hsl(0,72%,51%)] dark:text-[hsl(0,62%,40%)]">
-                  {errors.name.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
 
@@ -114,7 +116,7 @@ export function CreateAccountDrawer({ children }) {
             <div className="space-y-2">
               <label
                 htmlFor="type"
-                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none"
               >
                 Account Type
               </label>
@@ -124,29 +126,17 @@ export function CreateAccountDrawer({ children }) {
               >
                 <SelectTrigger
                   id="type"
-                  className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] focus:ring-[hsl(217,91%,60%)]"
+                  className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)]"
                 >
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[hsl(220,20%,8%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)]">
-                  <SelectItem
-                    value="CURRENT"
-                    className="focus:bg-[hsl(210,40%,96%)] dark:focus:bg-[hsl(220,15%,15%)] focus:text-[hsl(217,91%,60%)]"
-                  >
-                    Current
-                  </SelectItem>
-                  <SelectItem
-                    value="SAVINGS"
-                    className="focus:bg-[hsl(210,40%,96%)] dark:focus:bg-[hsl(220,15%,15%)] focus:text-[hsl(160,84%,39%)]"
-                  >
-                    Savings
-                  </SelectItem>
+                <SelectContent>
+                  <SelectItem value="CURRENT">Current</SelectItem>
+                  <SelectItem value="SAVINGS">Savings</SelectItem>
                 </SelectContent>
               </Select>
               {errors.type && (
-                <p className="text-sm text-[hsl(0,72%,51%)] dark:text-[hsl(0,62%,40%)]">
-                  {errors.type.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.type.message}</p>
               )}
             </div>
 
@@ -154,7 +144,7 @@ export function CreateAccountDrawer({ children }) {
             <div className="space-y-2">
               <label
                 htmlFor="balance"
-                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] leading-none"
               >
                 Initial Balance
               </label>
@@ -163,13 +153,11 @@ export function CreateAccountDrawer({ children }) {
                 type="number"
                 step="0.01"
                 placeholder="0.00"
-                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] placeholder:text-[hsl(215,20%,40%)] dark:placeholder:text-[hsl(215,20%,65%)] focus-visible:ring-[hsl(217,91%,60%)]"
+                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] focus-visible:ring-[hsl(217,91%,60%)]"
                 {...register("balance")}
               />
               {errors.balance && (
-                <p className="text-sm text-[hsl(0,72%,51%)] dark:text-[hsl(0,62%,40%)]">
-                  {errors.balance.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.balance.message}</p>
               )}
             </div>
 
@@ -190,7 +178,7 @@ export function CreateAccountDrawer({ children }) {
                 id="isDefault"
                 checked={watch("isDefault")}
                 onCheckedChange={(checked) => setValue("isDefault", checked)}
-                className="data-[state=checked]:bg-[hsl(217,91%,60%)] data-[state=unchecked]:bg-[hsl(214,32%,91%)] dark:data-[state=unchecked]:bg-[hsl(220,15%,25%)]"
+                className="data-[state=checked]:bg-[hsl(217,91%,60%)]"
               />
             </div>
 
@@ -200,7 +188,7 @@ export function CreateAccountDrawer({ children }) {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] text-[hsl(222,47%,11%)] dark:text-[hsl(210,40%,98%)] hover:bg-[hsl(210,40%,96%)] dark:hover:bg-[hsl(220,15%,15%)] bg-white dark:bg-transparent"
+                  className="flex-1 border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)]"
                 >
                   Cancel
                 </Button>
@@ -209,7 +197,7 @@ export function CreateAccountDrawer({ children }) {
               <Button
                 type="submit"
                 disabled={createAccountLoading}
-                className="flex-1 bg-[hsl(217,91%,60%)] hover:bg-[hsl(217,91%,52%)] text-white dark:text-[hsl(210,40%,98%)] font-medium transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 bg-[hsl(217,91%,60%)] hover:bg-[hsl(217,91%,52%)] text-white font-medium transition-colors duration-200 disabled:opacity-60"
               >
                 {createAccountLoading ? (
                   <>

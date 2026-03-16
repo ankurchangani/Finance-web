@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ArrowUpRight, ArrowDownRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
@@ -26,6 +25,8 @@ import { EditAccountDrawer } from "./edit-account-drawer";
 
 export function AccountCard({ account }) {
   const { name, type, balance, id, isDefault } = account;
+  // ✅ Control dropdown open state manually so we can close it programmatically
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
 
   // ── Update Default ──
@@ -55,12 +56,16 @@ export function AccountCard({ account }) {
 
   const handleDelete = async (event) => {
     event.preventDefault();
+    // ✅ Close dropdown first, then confirm dialog
+    setDropdownOpen(false);
     if (!window.confirm(`Delete "${name}" account? This will also delete all its transactions.`)) return;
     await deleteFn(id);
   };
 
   const handleEdit = (event) => {
     event.preventDefault();
+    // ✅ Close dropdown first, then open drawer
+    setDropdownOpen(false);
     setShowEditDrawer(true);
   };
 
@@ -82,9 +87,15 @@ export function AccountCard({ account }) {
 
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow group relative overflow-hidden">
+      <Card className="hover:shadow-md transition-all duration-200 group relative overflow-hidden cursor-pointer">
         {/* Subtle top accent line */}
-        <div className={`absolute top-0 left-0 right-0 h-0.5 ${isDefault ? "bg-gradient-to-r from-violet-500 to-blue-500" : "bg-transparent group-hover:bg-gradient-to-r group-hover:from-violet-500/40 group-hover:to-blue-500/40"} transition-all duration-300`} />
+        <div
+          className={`absolute top-0 left-0 right-0 h-0.5 transition-all duration-300 ${
+            isDefault
+              ? "bg-gradient-to-r from-violet-500 to-blue-500"
+              : "bg-transparent group-hover:bg-gradient-to-r group-hover:from-violet-500/40 group-hover:to-blue-500/40"
+          }`}
+        />
 
         <Link href={`/account/${id}`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -104,55 +115,63 @@ export function AccountCard({ account }) {
                 disabled={updateDefaultLoading}
               />
 
-              {/* ── 3-dot Menu ── */}
-              <DropdownMenu>
+              {/* ── 3-dot Menu — controlled open state ── */}
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    onClick={(e) => e.preventDefault()}
-                    className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 ml-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setDropdownOpen((prev) => !prev);
+                    }}
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 ml-1 focus:outline-none"
                   >
-                    <MoreVertical className="h-4 w-4" />
+                    <MoreVertical className="h-4 w-4 shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
+
+                <DropdownMenuContent align="end" className="w-40 shadow-lg rounded-xl p-1">
+
                   <DropdownMenuItem
                     onClick={handleEdit}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm transition-colors duration-150 hover:bg-muted"
                   >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit Account
+                    <Pencil className="h-3.5 w-3.5 shrink-0" />
+                    <span>Edit Account</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+
+                  <DropdownMenuSeparator className="my-1" />
+
                   <DropdownMenuItem
                     onClick={handleDelete}
                     disabled={deleteLoading}
-                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm transition-colors duration-150 text-destructive focus:text-destructive hover:bg-destructive/10"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    {deleteLoading ? "Deleting..." : "Delete Account"}
+                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                    <span>{deleteLoading ? "Deleting..." : "Delete Account"}</span>
                   </DropdownMenuItem>
+
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </CardHeader>
 
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold tracking-tight">
               ${parseFloat(balance).toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {type.charAt(0) + type.slice(1).toLowerCase()} Account
             </p>
           </CardContent>
 
-          <CardFooter className="flex justify-between text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
-              Income
+          <CardFooter className="flex justify-between text-sm text-muted-foreground pb-4">
+            <div className="flex items-center gap-1">
+              <ArrowUpRight className="h-4 w-4 text-green-500 shrink-0" />
+              <span>Income</span>
             </div>
-            <div className="flex items-center">
-              <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
-              Expense
+            <div className="flex items-center gap-1">
+              <ArrowDownRight className="h-4 w-4 text-red-500 shrink-0" />
+              <span>Expense</span>
             </div>
           </CardFooter>
         </Link>

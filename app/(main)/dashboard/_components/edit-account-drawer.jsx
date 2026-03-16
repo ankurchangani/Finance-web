@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,7 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import { editAccount } from "@/actions/account";
 import { accountSchema } from "@/app/lib/schema";
 
-export function EditAccountDrawer({ account, open, onOpenChange }) {
+// ✅ Added onSuccess prop — parent can react when edit completes
+export function EditAccountDrawer({ account, open, onOpenChange, onSuccess }) {
   const {
     register,
     handleSubmit,
@@ -71,6 +73,8 @@ export function EditAccountDrawer({ account, open, onOpenChange }) {
   useEffect(() => {
     if (editResult?.success) {
       toast.success("Account updated successfully");
+      // ✅ Notify parent that edit succeeded (so it can hide the edit icon)
+      onSuccess?.();
       onOpenChange(false);
     }
   }, [editResult]);
@@ -100,7 +104,7 @@ export function EditAccountDrawer({ account, open, onOpenChange }) {
               </label>
               <Input
                 placeholder="e.g., Main Checking"
-                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)]"
+                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] focus-visible:ring-[hsl(217,91%,60%)]"
                 {...register("name")}
               />
               {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
@@ -135,7 +139,7 @@ export function EditAccountDrawer({ account, open, onOpenChange }) {
                 type="number"
                 step="0.01"
                 placeholder="0.00"
-                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)]"
+                className="bg-white dark:bg-[hsl(220,20%,6%)] border-[hsl(214,32%,91%)] dark:border-[hsl(220,15%,15%)] focus-visible:ring-[hsl(217,91%,60%)]"
                 {...register("balance")}
               />
               {errors.balance && <p className="text-sm text-red-500">{errors.balance.message}</p>}
@@ -154,6 +158,7 @@ export function EditAccountDrawer({ account, open, onOpenChange }) {
               <Switch
                 checked={watch("isDefault")}
                 onCheckedChange={(checked) => setValue("isDefault", checked)}
+                className="data-[state=checked]:bg-[hsl(217,91%,60%)]"
               />
             </div>
 
@@ -167,7 +172,7 @@ export function EditAccountDrawer({ account, open, onOpenChange }) {
               <Button
                 type="submit"
                 disabled={editLoading}
-                className="flex-1 bg-[hsl(217,91%,60%)] hover:bg-[hsl(217,91%,52%)] text-white"
+                className="flex-1 bg-[hsl(217,91%,60%)] hover:bg-[hsl(217,91%,52%)] text-white transition-colors duration-200 disabled:opacity-60"
               >
                 {editLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>

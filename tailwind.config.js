@@ -1,12 +1,28 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,jsx}",
+    "./components/**/*.{js,jsx}",
+    "./app/**/*.{js,jsx}",
+    "./src/**/*.{js,jsx}",
   ],
   theme: {
     extend: {
+      // ── Custom Font Families ──
+      fontFamily: {
+        // Titles, headings, display text
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
+        // Body, paragraphs, UI text
+        poppins: ["var(--font-poppins)", "sans-serif"],
+        // Keep sans as Poppins by default
+        sans: ["var(--font-poppins)", "sans-serif"],
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -48,11 +64,6 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
       },
     },
   },

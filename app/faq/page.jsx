@@ -96,36 +96,36 @@ export default function FAQSection() {
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white">
-      <section className="max-w-5xl mx-auto px-6 py-24">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
 
         {/* ── Badge ── */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 mb-5">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 mb-4 sm:mb-5">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
-          <span className="font-mono text-xs font-semibold tracking-widest uppercase text-cyan-400">
+          <span className="font-montserrat text-xs font-semibold tracking-widest uppercase text-cyan-400">
             Help Center
           </span>
         </div>
 
         {/* ── Title ── */}
-        <h2 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-4">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-3 sm:mb-4 font-montserrat">
           <span className="text-cyan-400">Frequently</span> Asked
           <br />
           <span className="text-purple-400">Questions</span>
         </h2>
 
-        <p className="text-white/50 text-base leading-relaxed max-w-lg mb-14">
+        <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-lg mb-10 sm:mb-14 font-poppins">
           {"Everything you need to know about managing your finances with Welth. "}
           {"Can't find the answer? Reach out to our support team."}
         </p>
 
         {/* ── Stats ── */}
-        <div className="flex flex-wrap gap-10 mb-14">
+        <div className="flex flex-wrap gap-6 sm:gap-10 mb-10 sm:mb-14">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-0.5">
-              <span className="font-mono text-2xl font-extrabold tracking-tight text-cyan-400">
+              <span className="font-montserrat text-xl sm:text-2xl font-extrabold tracking-tight text-cyan-400">
                 {s.val}
               </span>
-              <span className="text-[11px] uppercase tracking-widest text-white/40">
+              <span className="text-[11px] uppercase tracking-widest text-white/40 font-poppins">
                 {s.label}
               </span>
             </div>
@@ -133,7 +133,7 @@ export default function FAQSection() {
         </div>
 
         {/* ── Layout ── */}
-        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8 items-start">
 
           {/* Category Sidebar */}
           <div className="flex flex-row flex-wrap md:flex-col gap-2 md:sticky md:top-24">
@@ -141,15 +141,15 @@ export default function FAQSection() {
               <button
                 key={cat.category}
                 onClick={() => { setActiveCategory(i); setOpenIndex(null); }}
-                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left transition-all duration-200 border
+                className={`flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium text-left transition-all duration-200 border font-poppins
                   ${activeCategory === i
                     ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
                     : "bg-transparent border-transparent text-white/50 hover:bg-white/5 hover:text-white/80"
                   }`}
               >
-                <span className="text-base leading-none">{cat.icon}</span>
+                <span className="text-sm sm:text-base leading-none">{cat.icon}</span>
                 <span className="flex-1">{cat.category}</span>
-                <span className={`ml-auto font-mono text-[11px] px-2 py-0.5 rounded-full transition-colors
+                <span className={`ml-auto font-montserrat text-[11px] px-1.5 py-0.5 rounded-full transition-colors
                   ${activeCategory === i
                     ? "bg-cyan-500/15 text-cyan-400"
                     : "bg-white/5 text-white/40"
@@ -178,21 +178,21 @@ export default function FAQSection() {
                   {/* Question button */}
                   <button
                     onClick={() => toggle(globalIdx)}
-                    className="w-full flex items-center justify-between gap-4 px-5 py-5 text-left"
+                    className="w-full flex items-center justify-between gap-3 sm:gap-4 px-4 sm:px-5 py-4 sm:py-5 text-left"
                   >
-                    <div className="flex items-start gap-3">
-                      <span className={`font-mono text-[11px] mt-0.5 min-w-[24px] flex-shrink-0 text-cyan-400 transition-opacity
+                    <div className="flex items-start gap-2.5 sm:gap-3">
+                      <span className={`font-montserrat text-[11px] mt-0.5 min-w-[24px] flex-shrink-0 text-cyan-400 transition-opacity
                         ${isOpen ? "opacity-100" : "opacity-50"}`}>
                         0{i + 1}
                       </span>
-                      <span className={`text-sm font-semibold leading-snug transition-colors
+                      <span className={`text-sm font-semibold leading-snug transition-colors font-poppins
                         ${isOpen ? "text-white" : "text-white/80"}`}>
                         {faq.q}
                       </span>
                     </div>
 
                     {/* Chevron icon */}
-                    <span className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300
+                    <span className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all duration-300
                       ${isOpen ? "bg-cyan-500/10 rotate-180" : "bg-white/5"}`}>
                       <svg
                         width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -207,7 +207,7 @@ export default function FAQSection() {
                   {/* Answer */}
                   <div className={`transition-all duration-300 ease-in-out overflow-hidden
                     ${isOpen ? "max-h-72 opacity-100" : "max-h-0 opacity-0"}`}>
-                    <div className="px-5 pb-5 pl-14 pt-4 text-sm leading-relaxed text-white/50 border-t border-white/[0.06]">
+                    <div className="px-4 sm:px-5 pb-5 pl-10 sm:pl-14 pt-3 sm:pt-4 text-sm leading-relaxed text-white/50 border-t border-white/[0.06] font-poppins">
                       {faq.a}
                     </div>
                   </div>
@@ -218,18 +218,17 @@ export default function FAQSection() {
         </div>
 
         {/* ── Bottom CTA ── */}
-        <div className="mt-16 relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-[#0f1629] to-[#151d35] p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-          {/* Glow blob */}
+        <div className="mt-12 sm:mt-16 relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-[#0f1629] to-[#151d35] p-7 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-6">
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
 
           <div className="relative">
-            <h3 className="text-xl font-bold mb-1.5">Still have questions?</h3>
-            <p className="text-sm text-white/50">
+            <h3 className="text-lg sm:text-xl font-bold mb-1.5 font-montserrat">Still have questions?</h3>
+            <p className="text-sm text-white/50 font-poppins">
               Our support team is available 24/7 to help you get the most out of Welth.
             </p>
           </div>
 
-          <button className="relative flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-black bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_4px_20px_rgba(34,189,253,0.3)] hover:shadow-[0_8px_32px_rgba(34,189,253,0.5)] hover:-translate-y-0.5 transition-all duration-200">
+          <button className="relative flex-shrink-0 inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm text-black bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_4px_20px_rgba(34,189,253,0.3)] hover:shadow-[0_8px_32px_rgba(34,189,253,0.5)] hover:-translate-y-0.5 transition-all duration-200 font-montserrat">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
