@@ -7,10 +7,7 @@ import { AccountChart } from "../_components/account-chart";
 
 export default async function AccountPage({ params }) {
   const accountData = await getAccountWithTransactions(params.id);
-
-  if (!accountData) {
-    notFound();
-  }
+  if (!accountData) notFound();
 
   const { transactions, ...account } = accountData;
 
@@ -22,11 +19,9 @@ export default async function AccountPage({ params }) {
             {account.name}
           </h1>
           <p className="text-muted-foreground">
-            {account.type.charAt(0) + account.type.slice(1).toLowerCase()}{" "}
-            Account
+            {account.type.charAt(0) + account.type.slice(1).toLowerCase()} Account
           </p>
         </div>
-
         <div className="text-right pb-2">
           <div className="text-xl sm:text-2xl font-bold">
             ${parseFloat(account.balance).toFixed(2)}
@@ -36,18 +31,10 @@ export default async function AccountPage({ params }) {
           </p>
         </div>
       </div>
-
-      {/* Chart Section */}
-      <Suspense
-        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
-      >
+      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}>
         <AccountChart transactions={transactions} />
       </Suspense>
-
-      {/* Transactions Table */}
-      <Suspense
-        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
-      >
+      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}>
         <TransactionTable transactions={transactions} />
       </Suspense>
     </div>

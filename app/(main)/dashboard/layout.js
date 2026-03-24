@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BarChart2, ArrowUpRight } from "lucide-react";
 
+
 export default function Layout() {
   return (
     <div className="px-5">

@@ -33,8 +33,7 @@ export async function getUserAccounts() {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
-
-    // ✅ user upsert — DB માં ન હોય તો create કરો
+    
     const user = await getOrCreateUser(userId);
 
     const accounts = await db.account.findMany({
