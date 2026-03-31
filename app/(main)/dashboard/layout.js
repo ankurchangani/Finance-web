@@ -4,33 +4,46 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BarChart2, ArrowUpRight } from "lucide-react";
 
-
 export default function Layout() {
   return (
-    <div className="px-5">
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-6xl font-bold tracking-tight gradient-title">
+    <div className="px-4 sm:px-6 lg:px-8 py-4">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        
+        {/* Title */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight gradient-title">
           Dashboard
         </h1>
 
+        {/* Button */}
         <Link
           href="/advanced-analytics"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+          className="
+            inline-flex items-center justify-center gap-1.5
+            w-full sm:w-auto
+            px-4 py-2 rounded-full
             border border-purple-300/40 text-purple-900
             dark:border-purple-400/25 dark:text-purple-300
             text-sm font-medium
             hover:bg-purple-500/8 hover:border-purple-400/60
             dark:hover:bg-purple-400/10 dark:hover:border-purple-400/50
-            transition-all duration-200 hover:-translate-y-px"
+            transition-all duration-200 hover:-translate-y-px
+          "
         >
-          <BarChart2 className="w-3.5 h-3.5" />
-          View Analytics
-          <ArrowUpRight className="w-3 h-3" />
+          <BarChart2 className="w-4 h-4" />
+          <span>View Analytics</span>
+          <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
+      {/* Content */}
       <Suspense
-        fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
+        fallback={
+          <div className="mt-4">
+            <BarLoader width={"100%"} color="#9333ea" />
+          </div>
+        }
       >
         <DashboardPage />
       </Suspense>
