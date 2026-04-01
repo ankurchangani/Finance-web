@@ -1,4 +1,5 @@
-import { memo } from "react";
+
+import { memo} from "react";
 
 // ─── Keyframe Styles ────────────────────────────────────────────────────────
 const styles = `
@@ -33,21 +34,24 @@ const styles = `
 }
 `;
 
-// ─── Top Bar Loader (fixed – screen top) ────────────────────────────────────
+// ─── Top Bar Loader ──────────────────────────────────────────────────────────
 export const TopBarLoader = memo(({ isLoading = true }) => {
   if (!isLoading) return null;
   return (
     <>
       <style>{styles}</style>
       <div className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden bg-transparent">
+        {/* Track */}
         <div
           className="h-full bg-indigo-500 relative"
           style={{ animation: "bar-slide 2.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
         >
+          {/* Glow */}
           <div
             className="absolute inset-0 bg-indigo-400 rounded-full"
             style={{ animation: "glow-pulse 0.8s ease-in-out infinite" }}
           />
+          {/* Shimmer sweep */}
           <div
             className="absolute top-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-white/60 to-transparent"
             style={{ animation: "shimmer 1.6s ease-in-out infinite" }}
@@ -57,24 +61,6 @@ export const TopBarLoader = memo(({ isLoading = true }) => {
     </>
   );
 });
-
-// ─── Dashboard Bar Loader (inline – below heading) ───────────────────────────
-export const DashBarLoader = memo(() => (
-  <>
-    <style>{styles}</style>
-    <div className="w-full h-[3px] mt-1 rounded-full overflow-hidden bg-purple-950/30">
-      <div
-        className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-indigo-500 rounded-full relative"
-        style={{ animation: "bar-slide 2.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
-      >
-        <div
-          className="absolute top-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-          style={{ animation: "shimmer 1.6s ease-in-out infinite" }}
-        />
-      </div>
-    </div>
-  </>
-));
 
 // ─── Full-Page Overlay Loader ────────────────────────────────────────────────
 export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) => {
@@ -88,16 +74,16 @@ export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) =>
       >
         {/* Spinner ring */}
         <div className="relative w-14 h-14">
+          {/* Outer track */}
           <div className="absolute inset-0 rounded-full border-4 border-indigo-100 dark:border-indigo-900" />
+          {/* Spinning arc */}
           <div
             className="absolute inset-0 rounded-full border-4 border-transparent border-t-indigo-500"
             style={{ animation: "spin-ring 0.9s linear infinite" }}
           />
+          {/* Inner dot */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="w-2.5 h-2.5 rounded-full bg-indigo-500"
-              style={{ animation: "glow-pulse 1s ease-in-out infinite" }}
-            />
+            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" style={{ animation: "glow-pulse 1s ease-in-out infinite" }} />
           </div>
         </div>
 
@@ -124,7 +110,7 @@ export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) =>
   );
 });
 
-// ─── Inline / Button Spinner ─────────────────────────────────────────────────
+// ─── Inline / Button Loader ──────────────────────────────────────────────────
 export const SpinnerLoader = memo(({ size = 20, color = "#6366f1" }) => (
   <>
     <style>{styles}</style>
@@ -146,7 +132,6 @@ export const SpinnerLoader = memo(({ size = 20, color = "#6366f1" }) => (
 const Loading = memo(({ variant = "topbar", isLoading = true, message }) => {
   if (variant === "page")    return <PageLoader    isLoading={isLoading} message={message} />;
   if (variant === "spinner") return <SpinnerLoader />;
-  if (variant === "dash")    return <DashBarLoader />;
   return <TopBarLoader isLoading={isLoading} />;
 });
 
