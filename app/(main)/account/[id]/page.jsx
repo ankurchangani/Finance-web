@@ -1,9 +1,11 @@
+// app/account/[id]/page.jsx
+
 import { Suspense } from "react";
-import { getAccountWithTransactions } from "@/actions/account";
-import { BarLoader } from "react-spinners";
-import { TransactionTable } from "../_components/transaction-table";
 import { notFound } from "next/navigation";
+import { BarLoader } from "react-spinners";
+import { getAccountWithTransactions } from "@/actions/account";
 import { AccountChart } from "../_components/account-chart";
+import { TransactionTable } from "../_components/transaction-table";
 
 export default async function AccountPage({ params }) {
   const accountData = await getAccountWithTransactions(params.id);
@@ -13,6 +15,8 @@ export default async function AccountPage({ params }) {
 
   return (
     <div className="space-y-8 px-5">
+
+      {/* Account Header */}
       <div className="flex gap-4 items-end justify-between">
         <div>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight gradient-title capitalize">
@@ -31,12 +35,21 @@ export default async function AccountPage({ params }) {
           </p>
         </div>
       </div>
-      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}>
+
+      {/* Income vs Expense Bar Chart */}
+      <Suspense
+        fallback={<BarLoader className="mt-4" width="100%" color="#9333ea" />}
+      >
         <AccountChart transactions={transactions} />
       </Suspense>
-      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}>
+
+      {/* Transaction Table */}
+      <Suspense
+        fallback={<BarLoader className="mt-4" width="100%" color="#9333ea" />}
+      >
         <TransactionTable transactions={transactions} />
       </Suspense>
+
     </div>
   );
 }

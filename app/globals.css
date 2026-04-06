@@ -4,7 +4,6 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  
 }
 
 html {
@@ -74,7 +73,48 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+}
+
+/* ── Light mode page background ─────────────────────────── */
+/* Your pages use inline dark backgrounds (#070a12 etc).
+   These overrides make sure the page body and sections respond
+   to the .dark toggle without touching every component. */
+
+html:not(.dark) body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* Hero / full-bleed dark sections adapt in light mode */
+html:not(.dark) [data-theme-section="hero"] {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #f8fafc 100%) !important;
+}
+
+/* Card surfaces */
+html:not(.dark) .glass-card,
+html:not(.dark) [class*="bg-white/"],
+html:not(.dark) [class*="bg-black/"] {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(14, 165, 233, 0.15) !important;
+}
+
+/* ── Smooth theme transition on all elements ─────────────── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+
+/* Exclude transitions on animated elements to avoid jank */
+[class*="animate-"],
+[style*="animation"],
+canvas,
+video {
+  transition: none !important;
 }
 
 @layer utilities {
@@ -93,8 +133,8 @@ html {
 }
 
 @layer utilities {
-  .section-title{
-    @apply text-3xl font-bold text-center mb-12 bg-[linear-gradient(135deg,hsl(195_100%_55%),hsl(270_80%_60%))] bg-clip-text text-transparent
+  .section-title {
+    @apply text-3xl font-bold text-center mb-12 bg-[linear-gradient(135deg,hsl(195_100%_55%),hsl(270_80%_60%))] bg-clip-text text-transparent;
   }
 }
 
@@ -113,8 +153,8 @@ html {
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
@@ -123,7 +163,6 @@ html {
   animation: gradientMove 3s ease infinite;
 }
 
-
 .card-3d {
   transform-style: preserve-3d;
   transition: transform 0.4s ease;
@@ -131,3 +170,30 @@ html {
 .card-3d:hover {
   transform: rotateX(6deg) rotateY(-6deg) translateY(-6px);
 }
+
+@keyframes float-up {
+  0%   { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 350ms ease, transform 350ms ease;
+}
+
+/* Dashboard card stagger utility */
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }

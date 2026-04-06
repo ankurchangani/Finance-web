@@ -12,7 +12,7 @@ export function Footer() {
         {/* Copyright */}
         <p className="text-white/35 text-sm tracking-wide">
           &copy; {year}{" "}
-          <span className="text-[#22BDFD]/70 font-medium">Welth</span>
+          <span className="text-[#22BDFD]/70 font-medium">Finovexa</span>
           . All rights reserved.
         </p>
 

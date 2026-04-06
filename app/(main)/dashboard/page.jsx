@@ -1,58 +1,134 @@
+// app/dashboard/page.jsx
+// Server Component — fetches data, renders all dashboard sections
+
 import { Suspense } from "react";
-import { getUserAccounts } from "@/actions/dashboard";
-import { getDashboardData } from "@/actions/dashboard";
+import { Plus } from "lucide-react";
+import { getUserAccounts, getDashboardData } from "@/actions/dashboard";
 import { getCurrentBudget } from "@/actions/budget";
 import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { BudgetProgress } from "./_components/budget-progress";
-import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
 import { DashboardOverview } from "./_components/transaction-overview";
+// import { MonthlyChart } from "./_components/monthly-chart";
+import { DashboardStatsCards } from "./_components/stats-cards";
+import { SkeletonCard } from "./loading";
 
+/* ── Compute summary stats ─────────────────────────────────────── */
+function computeStats(accounts, transactions) {
+  const totalBalance = accounts.reduce(
+    (sum, a) => sum + (Number(a.balance) || 0),
+    0
+  );
+  const now = new Date();
+  const thisMonth = transactions.filter((t) => {
+    const d = new Date(t.date);
+    return (
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear()
+    );
+  });
+  const monthlyIncome = thisMonth
+    .filter((t) => t.type === "INCOME")
+    .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+  const monthlyExpense = thisMonth
+    .filter((t) => t.type === "EXPENSE")
+    .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+
+  return { totalBalance, monthlyIncome, monthlyExpense };
+}
+
+/* ── Build last-6-months bar data ──────────────────────────────── */
+function buildMonthlyData(transactions) {
+  const map = {};
+  transactions.forEach((t) => {
+    const d = new Date(t.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!map[key]) map[key] = { label: key, income: 0, expense: 0 };
+    if (t.type === "INCOME") map[key].income += Number(t.amount) || 0;
+    if (t.type === "EXPENSE") map[key].expense += Number(t.amount) || 0;
+  });
+  return Object.values(map)
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-6);
+}
+
+/* ── Page ──────────────────────────────────────────────────────── */
 export default async function DashboardPage() {
   const [accounts, transactions] = await Promise.all([
     getUserAccounts(),
     getDashboardData(),
   ]);
 
-  const defaultAccount = accounts?.find((account) => account.isDefault);
+  const safeAccounts = accounts || [];
+  const safeTransactions = transactions || [];
 
-  // Get budget for default account
+  const defaultAccount = safeAccounts.find((a) => a.isDefault);
   let budgetData = null;
   if (defaultAccount) {
     budgetData = await getCurrentBudget(defaultAccount.id);
   }
 
+  const stats = computeStats(safeAccounts, safeTransactions);
+  const monthlyData = buildMonthlyData(safeTransactions);
+
   return (
-    <div className="space-y-8">
-      {/* Budget Progress */}
+    <div className="space-y-6 pb-10">
+
+      {/* 1. Stats row */}
+      <DashboardStatsCards stats={stats} />
+
+      {/* 2. Budget progress */}
       <BudgetProgress
         initialBudget={budgetData?.budget}
         currentExpenses={budgetData?.currentExpenses || 0}
       />
 
-      {/* Dashboard Overview */}
-      <DashboardOverview
-        accounts={accounts}
-        transactions={transactions || []}
-      />
+      {/* 3. Monthly income vs expense 3D bar chart */}
+      {/* <Suspense fallback={<SkeletonCard />}>
+        <MonthlyChart data={monthlyData} />
+      </Suspense> */}
 
-      {/* Accounts Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CreateAccountDrawer>
-          <Card className="hover:shadow-md transition-shadow cursor-pointer border-dashed">
-            <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">
-              <Plus className="h-10 w-10 mb-2" />
-              <p className="text-sm font-medium">Add New Account</p>
-            </CardContent>
-          </Card>
-        </CreateAccountDrawer>
-        {accounts.length > 0 &&
-          accounts?.map((account) => (
-            <AccountCard key={account.id} account={account} />
+      {/* 4. Recent transactions + Expense pie chart */}
+      <Suspense
+        fallback={
+          <div className="grid gap-5 md:grid-cols-2">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        }
+      >
+        <DashboardOverview
+          accounts={safeAccounts}
+          transactions={safeTransactions}
+        />
+      </Suspense>
+
+      {/* 5. Accounts grid */}
+      <section>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 mb-4">
+          Your Accounts
+        </p>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Add new account card */}
+          <CreateAccountDrawer>
+            <div className="group rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/60 hover:border-violet-400 dark:hover:border-violet-500 hover:bg-violet-50/60 dark:hover:bg-violet-500/5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-lg min-h-[180px] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500 group-hover:text-violet-500 dark:group-hover:text-violet-400 transition-colors duration-200">
+                <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-current flex items-center justify-center group-hover:scale-110 group-hover:rotate-90 transition-all duration-300">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-bold">Add New Account</p>
+              </div>
+            </div>
+          </CreateAccountDrawer>
+
+          {/* Account cards */}
+          {safeAccounts.map((account, i) => (
+            <AccountCard key={account.id} account={account} delay={i * 70} />
           ))}
-      </div>
+        </div>
+      </section>
+
     </div>
   );
 }
-

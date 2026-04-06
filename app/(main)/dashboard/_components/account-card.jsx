@@ -1,16 +1,17 @@
 "use client";
+// app/dashboard/_components/account-card.jsx
+// FIX: Card click → router.push(/account/[id]) - route-change-loader trigger thay
+// FIX: Switch & Dropdown stopPropagation - card navigation block nahi thay
+// FIX: No nested <a> tags (Link inside div problem removed)
 
-import { ArrowUpRight, ArrowDownRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowUpRight, ArrowDownRight,
+  MoreVertical, Pencil, Trash2, Star,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import useFetch from "@/hooks/use-fetch";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,18 +19,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
 import { updateDefaultAccount, deleteAccount } from "@/actions/account";
 import { toast } from "sonner";
 import { EditAccountDrawer } from "./edit-account-drawer";
+import { cn } from "@/lib/utils";
 
-export function AccountCard({ account }) {
+const TYPE_STYLES = {
+  CURRENT: {
+    gradient: "from-violet-500/8 via-blue-500/5 to-transparent",
+    accent: "#8B5CF6",
+    accentLight: "bg-violet-100 dark:bg-violet-500/15",
+    accentText: "text-violet-600 dark:text-violet-300",
+    accentBorder: "border-violet-200 dark:border-violet-500/25",
+    label: "Current",
+  },
+  SAVINGS: {
+    gradient: "from-emerald-500/8 via-teal-500/5 to-transparent",
+    accent: "#10B981",
+    accentLight: "bg-emerald-100 dark:bg-emerald-500/15",
+    accentText: "text-emerald-600 dark:text-emerald-300",
+    accentBorder: "border-emerald-200 dark:border-emerald-500/25",
+    label: "Savings",
+  },
+};
+
+export function AccountCard({ account, delay = 0 }) {
   const { name, type, balance, id, isDefault } = account;
-  // ✅ Control dropdown open state manually so we can close it programmatically
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
+  const style = TYPE_STYLES[type] || TYPE_STYLES.CURRENT;
 
-  // ── Update Default ──
   const {
     loading: updateDefaultLoading,
     fn: updateDefaultFn,
@@ -37,7 +57,6 @@ export function AccountCard({ account }) {
     error: updateError,
   } = useFetch(updateDefaultAccount);
 
-  // ── Delete Account ──
   const {
     loading: deleteLoading,
     fn: deleteFn,
@@ -45,26 +64,32 @@ export function AccountCard({ account }) {
     error: deleteError,
   } = useFetch(deleteAccount);
 
-  const handleDefaultChange = async (event) => {
-    event.preventDefault();
+  // ── Card click → navigate (triggers route-change-loader) ──────────
+  const handleCardClick = () => {
+    router.push(`/account/${id}`);
+  };
+
+  // ── Switch: stopPropagation so card click nahi thay ──────────────
+  const handleDefaultChange = (e) => {
+    e.stopPropagation();
     if (isDefault) {
       toast.warning("At least 1 default account is required");
       return;
     }
-    await updateDefaultFn(id);
+    updateDefaultFn(id);
   };
 
-  const handleDelete = async (event) => {
-    event.preventDefault();
-    // ✅ Close dropdown first, then confirm dialog
+  // ── Delete ────────────────────────────────────────────────────────
+  const handleDelete = (e) => {
+    e.stopPropagation();
     setDropdownOpen(false);
-    if (!window.confirm(`Delete "${name}" account? This will also delete all its transactions.`)) return;
-    await deleteFn(id);
+    if (!window.confirm(`Delete "${name}" account?\nThis will also delete all its transactions.`)) return;
+    deleteFn(id);
   };
 
-  const handleEdit = (event) => {
-    event.preventDefault();
-    // ✅ Close dropdown first, then open drawer
+  // ── Edit ──────────────────────────────────────────────────────────
+  const handleEdit = (e) => {
+    e.stopPropagation();
     setDropdownOpen(false);
     setShowEditDrawer(true);
   };
@@ -72,112 +97,182 @@ export function AccountCard({ account }) {
   useEffect(() => {
     if (updatedAccount?.success) toast.success("Default account updated");
   }, [updatedAccount]);
-
   useEffect(() => {
     if (updateError) toast.error(updateError.message || "Failed to update default account");
   }, [updateError]);
-
   useEffect(() => {
     if (deleteResult?.success) toast.success(`"${name}" account deleted`);
   }, [deleteResult]);
-
   useEffect(() => {
     if (deleteError) toast.error(deleteError.message || "Failed to delete account");
   }, [deleteError]);
 
   return (
     <>
-      <Card className="hover:shadow-md transition-all duration-200 group relative overflow-hidden cursor-pointer">
-        {/* Subtle top accent line */}
+      {/* ── Card div — onClick navigate, no nested Link ── */}
+      <div
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && handleCardClick()}
+        className={cn(
+          "group relative rounded-2xl overflow-hidden cursor-pointer select-none",
+          "bg-white dark:bg-slate-800/70",
+          "border border-slate-200/80 dark:border-slate-700/50",
+          "hover:border-slate-300 dark:hover:border-slate-500",
+          "hover:-translate-y-1.5 hover:shadow-2xl dark:hover:shadow-slate-900/40",
+          "active:translate-y-0 active:shadow-md",
+          "transition-all duration-300 ease-out",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40"
+        )}
+        style={{
+          animation: "float-up 0.45s ease both",
+          animationDelay: `${delay}ms`,
+        }}
+      >
+        {/* Top accent line — always visible if default, hover reveal otherwise */}
         <div
-          className={`absolute top-0 left-0 right-0 h-0.5 transition-all duration-300 ${
-            isDefault
-              ? "bg-gradient-to-r from-violet-500 to-blue-500"
-              : "bg-transparent group-hover:bg-gradient-to-r group-hover:from-violet-500/40 group-hover:to-blue-500/40"
-          }`}
+          className="absolute top-0 left-0 right-0 h-[2.5px]"
+          style={{
+            background: `linear-gradient(90deg, ${style.accent}, ${style.accent}44, transparent)`,
+            opacity: isDefault ? 1 : 0,
+            transition: "opacity 0.3s",
+          }}
+        />
+        <div
+          className="absolute top-0 left-0 right-0 h-[2.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: `linear-gradient(90deg, ${style.accent}77, ${style.accent}22, transparent)` }}
         />
 
-        <Link href={`/account/${id}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium capitalize flex items-center gap-2">
-              {name}
-              {isDefault && (
-                <span className="text-[10px] font-semibold text-violet-600 bg-violet-100 dark:bg-violet-500/10 dark:text-violet-400 px-2 py-0.5 rounded-full border border-violet-200 dark:border-violet-500/20">
-                  Default
-                </span>
-              )}
-            </CardTitle>
+        {/* Hover bg gradient */}
+        <div
+          className={cn(
+            "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none",
+            style.gradient
+          )}
+        />
 
-            <div className="flex items-center gap-1">
+        {/* Glow blob */}
+        <div
+          className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
+          style={{ background: style.accent }}
+        />
+
+        <div className="relative p-5">
+
+          {/* ── Header row ── */}
+          <div className="flex items-start justify-between mb-5">
+            <div className="flex-1 min-w-0 pr-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-slate-900 dark:text-white text-base truncate capitalize">
+                  {name}
+                </span>
+                {isDefault && (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                      style.accentLight,
+                      style.accentText,
+                      style.accentBorder
+                    )}
+                  >
+                    <Star className="w-2.5 h-2.5 fill-current" />
+                    Default
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{style.label} Account</p>
+            </div>
+
+            {/* Controls — stopPropagation prevents card click ── */}
+            <div
+              className="flex items-center gap-1 flex-shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Switch
                 checked={isDefault}
                 onClick={handleDefaultChange}
                 disabled={updateDefaultLoading}
+                className="scale-90 data-[state=checked]:bg-violet-500"
               />
 
-              {/* ── 3-dot Menu — controlled open state ── */}
               <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setDropdownOpen((prev) => !prev);
-                    }}
-                    className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 ml-1 focus:outline-none"
+                    onClick={(e) => { e.stopPropagation(); setDropdownOpen((p) => !p); }}
+                    className="h-8 w-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all duration-150 focus:outline-none"
                   >
-                    <MoreVertical className="h-4 w-4 shrink-0" />
+                    <MoreVertical className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-40 shadow-lg rounded-xl p-1">
-
+                <DropdownMenuContent
+                  align="end"
+                  className="w-44 shadow-2xl rounded-xl p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <DropdownMenuItem
                     onClick={handleEdit}
-                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm transition-colors duration-150 hover:bg-muted"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   >
-                    <Pencil className="h-3.5 w-3.5 shrink-0" />
-                    <span>Edit Account</span>
+                    <Pencil className="h-3.5 w-3.5 text-slate-400" />
+                    Edit Account
                   </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="my-1" />
-
+                  <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-slate-700/50" />
                   <DropdownMenuItem
                     onClick={handleDelete}
                     disabled={deleteLoading}
-                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm transition-colors duration-150 text-destructive focus:text-destructive hover:bg-destructive/10"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-400 focus:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                   >
-                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                    <span>{deleteLoading ? "Deleting..." : "Delete Account"}</span>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {deleteLoading ? "Deleting…" : "Delete Account"}
                   </DropdownMenuItem>
-
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </CardHeader>
+          </div>
 
-          <CardContent>
-            <div className="text-2xl font-bold tracking-tight">
-              ${parseFloat(balance).toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {type.charAt(0) + type.slice(1).toLowerCase()} Account
+          {/* ── Balance ── */}
+          <div className="mb-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-1">
+              Balance
             </p>
-          </CardContent>
+            <p className="text-[1.8rem] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none transition-transform duration-300 group-hover:scale-[1.02] origin-left">
+              ${parseFloat(balance).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
+          </div>
 
-          <CardFooter className="flex justify-between text-sm text-muted-foreground pb-4">
-            <div className="flex items-center gap-1">
-              <ArrowUpRight className="h-4 w-4 text-green-500 shrink-0" />
-              <span>Income</span>
+          {/* ── Footer ── */}
+          <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/40">
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+              <div className="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center">
+                <ArrowUpRight className="w-3 h-3 text-emerald-500" />
+              </div>
+              Income
             </div>
-            <div className="flex items-center gap-1">
-              <ArrowDownRight className="h-4 w-4 text-red-500 shrink-0" />
-              <span>Expense</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+              <div className="w-5 h-5 rounded-md bg-red-100 dark:bg-red-500/15 flex items-center justify-center">
+                <ArrowDownRight className="w-3 h-3 text-red-500" />
+              </div>
+              Expense
             </div>
-          </CardFooter>
-        </Link>
-      </Card>
 
-      {/* Edit Drawer — outside Link */}
+            {/* Arrow hint on hover */}
+            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0">
+              <ArrowUpRight
+                className="w-4 h-4"
+                style={{ color: style.accent }}
+              />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Edit Drawer — completely outside card */}
       <EditAccountDrawer
         account={account}
         open={showEditDrawer}

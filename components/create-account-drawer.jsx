@@ -56,9 +56,7 @@ export function CreateAccountDrawer({ children }) {
   const onSubmit = async (data) => {
     await createAccountFn(data);
   };
-
-  // ✅ FIX: Check newAccount?.success instead of just newAccount
-  // This prevents false triggers and ensures instant close on success
+  
   useEffect(() => {
     if (newAccount?.success) {
       toast.success("Account created successfully");

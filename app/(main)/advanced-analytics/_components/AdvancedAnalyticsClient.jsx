@@ -187,7 +187,7 @@ export function AdvancedAnalyticsClient({ accounts, transactions, budgetData }) 
           </p>
           <div className="flex items-center gap-1.5 text-xs text-white/20 font-poppins">
             <Zap className="w-3 h-3" style={{ color: C.blue }} />
-            <span>Welth Analytics Engine</span>
+            <span>Finovexa Analytics Engine</span>
           </div>
         </div>
 
