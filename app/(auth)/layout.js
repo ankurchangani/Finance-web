@@ -1,6 +1,7 @@
+// app/(auth)/layout.js
 export default function AuthLayout({ children }) {
   return (
-    <div className="flex items-center py-36 justify-center min-h-screen ">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       {children}
     </div>
   );
