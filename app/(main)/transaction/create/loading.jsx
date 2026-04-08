@@ -58,6 +58,7 @@ export const TopBarLoader = memo(function TopBarLoader({ isLoading = true }) {
     </>
   );
 });
+TopBarLoader.displayName = "TopBarLoader"; // ✅ Fix line 38 error
 
 // ─── Page Loader ─────────────────────────────────────────────────────────────
 export const PageLoader = memo(function PageLoader({
@@ -109,6 +110,7 @@ export const PageLoader = memo(function PageLoader({
     </>
   );
 });
+PageLoader.displayName = "PageLoader"; // ✅ Fix line 66 error
 
 // ─── Spinner Loader ──────────────────────────────────────────────────────────
 export const SpinnerLoader = memo(function SpinnerLoader({
@@ -132,6 +134,7 @@ export const SpinnerLoader = memo(function SpinnerLoader({
     </>
   );
 });
+SpinnerLoader.displayName = "SpinnerLoader"; // ✅ Fix line 114 error
 
 // ─── Main Loader ─────────────────────────────────────────────────────────────
 const Loading = memo(function Loading({
@@ -146,5 +149,6 @@ const Loading = memo(function Loading({
 
   return <TopBarLoader isLoading={isLoading} />;
 });
+Loading.displayName = "Loading"; // ✅ Fix line 132 error
 
 export default Loading;
