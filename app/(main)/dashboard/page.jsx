@@ -1,5 +1,4 @@
-// app/dashboard/page.jsx
-// Server Component — fetches data, renders all dashboard sections
+export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 import { Plus } from "lucide-react";
@@ -9,11 +8,9 @@ import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/transaction-overview";
-// import { MonthlyChart } from "./_components/monthly-chart";
 import { DashboardStatsCards } from "./_components/stats-cards";
 import { SkeletonCard } from "./loading";
 
-/* ── Compute summary stats ─────────────────────────────────────── */
 function computeStats(accounts, transactions) {
   const totalBalance = accounts.reduce(
     (sum, a) => sum + (Number(a.balance) || 0),
@@ -37,7 +34,6 @@ function computeStats(accounts, transactions) {
   return { totalBalance, monthlyIncome, monthlyExpense };
 }
 
-/* ── Build last-6-months bar data ──────────────────────────────── */
 function buildMonthlyData(transactions) {
   const map = {};
   transactions.forEach((t) => {
@@ -52,7 +48,6 @@ function buildMonthlyData(transactions) {
     .slice(-6);
 }
 
-/* ── Page ──────────────────────────────────────────────────────── */
 export default async function DashboardPage() {
   const [accounts, transactions] = await Promise.all([
     getUserAccounts(),
@@ -73,22 +68,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 pb-10">
-
-      {/* 1. Stats row */}
       <DashboardStatsCards stats={stats} />
 
-      {/* 2. Budget progress */}
       <BudgetProgress
         initialBudget={budgetData?.budget}
         currentExpenses={budgetData?.currentExpenses || 0}
       />
 
-      {/* 3. Monthly income vs expense 3D bar chart */}
-      {/* <Suspense fallback={<SkeletonCard />}>
-        <MonthlyChart data={monthlyData} />
-      </Suspense> */}
-
-      {/* 4. Recent transactions + Expense pie chart */}
       <Suspense
         fallback={
           <div className="grid gap-5 md:grid-cols-2">
@@ -103,14 +89,12 @@ export default async function DashboardPage() {
         />
       </Suspense>
 
-      {/* 5. Accounts grid */}
       <section>
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 mb-4">
           Your Accounts
         </p>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* Add new account card */}
           <CreateAccountDrawer>
             <div className="group rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/60 hover:border-violet-400 dark:hover:border-violet-500 hover:bg-violet-50/60 dark:hover:bg-violet-500/5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-lg min-h-[180px] flex items-center justify-center">
               <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500 group-hover:text-violet-500 dark:group-hover:text-violet-400 transition-colors duration-200">
@@ -122,13 +106,11 @@ export default async function DashboardPage() {
             </div>
           </CreateAccountDrawer>
 
-          {/* Account cards */}
           {safeAccounts.map((account, i) => (
             <AccountCard key={account.id} account={account} delay={i * 70} />
           ))}
         </div>
       </section>
-
     </div>
   );
 }
