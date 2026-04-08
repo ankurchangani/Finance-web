@@ -1,5 +1,4 @@
-
-import { memo} from "react";
+import { memo } from "react";
 
 // ─── Keyframe Styles ────────────────────────────────────────────────────────
 const styles = `
@@ -35,23 +34,21 @@ const styles = `
 `;
 
 // ─── Top Bar Loader ──────────────────────────────────────────────────────────
-export const TopBarLoader = memo(({ isLoading = true }) => {
+export const TopBarLoader = memo(function TopBarLoader({ isLoading = true }) {
   if (!isLoading) return null;
+
   return (
     <>
       <style>{styles}</style>
       <div className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden bg-transparent">
-        {/* Track */}
         <div
           className="h-full bg-indigo-500 relative"
           style={{ animation: "bar-slide 2.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
         >
-          {/* Glow */}
           <div
             className="absolute inset-0 bg-indigo-400 rounded-full"
             style={{ animation: "glow-pulse 0.8s ease-in-out infinite" }}
           />
-          {/* Shimmer sweep */}
           <div
             className="absolute top-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-white/60 to-transparent"
             style={{ animation: "shimmer 1.6s ease-in-out infinite" }}
@@ -62,9 +59,13 @@ export const TopBarLoader = memo(({ isLoading = true }) => {
   );
 });
 
-// ─── Full-Page Overlay Loader ────────────────────────────────────────────────
-export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) => {
+// ─── Page Loader ─────────────────────────────────────────────────────────────
+export const PageLoader = memo(function PageLoader({
+  isLoading = true,
+  message = "Loading…",
+}) {
   if (!isLoading) return null;
+
   return (
     <>
       <style>{styles}</style>
@@ -72,33 +73,32 @@ export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) =>
         className="fixed inset-0 z-[9998] flex flex-col items-center justify-center bg-white/80 dark:bg-gray-950/85 backdrop-blur-sm"
         style={{ animation: "fade-in 0.2s ease" }}
       >
-        {/* Spinner ring */}
         <div className="relative w-14 h-14">
-          {/* Outer track */}
           <div className="absolute inset-0 rounded-full border-4 border-indigo-100 dark:border-indigo-900" />
-          {/* Spinning arc */}
           <div
             className="absolute inset-0 rounded-full border-4 border-transparent border-t-indigo-500"
             style={{ animation: "spin-ring 0.9s linear infinite" }}
           />
-          {/* Inner dot */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" style={{ animation: "glow-pulse 1s ease-in-out infinite" }} />
+            <div
+              className="w-2.5 h-2.5 rounded-full bg-indigo-500"
+              style={{ animation: "glow-pulse 1s ease-in-out infinite" }}
+            />
           </div>
         </div>
 
-        {/* Dot row */}
         <div className="flex gap-1.5 mt-5">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
               className="w-2 h-2 rounded-full bg-indigo-400"
-              style={{ animation: `dot-bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+              style={{
+                animation: `dot-bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+              }}
             />
           ))}
         </div>
 
-        {/* Message */}
         <p
           className="mt-4 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
           style={{ animation: "float-up 0.5s 0.1s ease both" }}
@@ -110,28 +110,40 @@ export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) =>
   );
 });
 
-// ─── Inline / Button Loader ──────────────────────────────────────────────────
-export const SpinnerLoader = memo(({ size = 20, color = "#6366f1" }) => (
-  <>
-    <style>{styles}</style>
-    <span
-      className="inline-block rounded-full border-2 border-transparent"
-      style={{
-        width: size,
-        height: size,
-        borderTopColor: color,
-        borderRightColor: `${color}55`,
-        animation: "spin-ring 0.75s linear infinite",
-        flexShrink: 0,
-      }}
-    />
-  </>
-));
+// ─── Spinner Loader ──────────────────────────────────────────────────────────
+export const SpinnerLoader = memo(function SpinnerLoader({
+  size = 20,
+  color = "#6366f1",
+}) {
+  return (
+    <>
+      <style>{styles}</style>
+      <span
+        className="inline-block rounded-full border-2 border-transparent"
+        style={{
+          width: size,
+          height: size,
+          borderTopColor: color,
+          borderRightColor: `${color}55`,
+          animation: "spin-ring 0.75s linear infinite",
+          flexShrink: 0,
+        }}
+      />
+    </>
+  );
+});
 
-// ─── Default export: all-in-one ──────────────────────────────────────────────
-const Loading = memo(({ variant = "topbar", isLoading = true, message }) => {
-  if (variant === "page")    return <PageLoader    isLoading={isLoading} message={message} />;
+// ─── Main Loader ─────────────────────────────────────────────────────────────
+const Loading = memo(function Loading({
+  variant = "topbar",
+  isLoading = true,
+  message,
+}) {
+  if (variant === "page")
+    return <PageLoader isLoading={isLoading} message={message} />;
+
   if (variant === "spinner") return <SpinnerLoader />;
+
   return <TopBarLoader isLoading={isLoading} />;
 });
 
