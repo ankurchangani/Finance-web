@@ -2,7 +2,7 @@
 // Next.js automatically shows this file while the dashboard page is fetching data.
 // No isLoading prop needed — Next.js mounts/unmounts this component automatically.
 
-export default function DashboardLoading() {
+export default function AdvancedAnalyticsLoading() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
 

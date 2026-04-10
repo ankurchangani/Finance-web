@@ -5,10 +5,10 @@ export function Footer() {
 
   return (
     <footer
-      className="border-t border-white/10 py-8"
+      className="border-t border-white/10 pt-8"
       style={{ background: "linear-gradient(135deg, #0a0a0f 0%, #0d1117 100%)" }}
     >
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 pt-5">
         {/* Copyright */}
         <p className="text-white/35 text-sm tracking-wide">
           &copy; {year}{" "}

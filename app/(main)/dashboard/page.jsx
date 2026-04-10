@@ -9,7 +9,6 @@ import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { BudgetProgress } from "./_components/budget-progress";
 import { DashboardOverview } from "./_components/transaction-overview";
 import { DashboardStatsCards } from "./_components/stats-cards";
-import { SkeletonCard } from "./loading";
 
 function computeStats(accounts, transactions) {
   const totalBalance = accounts.reduce(
@@ -78,8 +77,8 @@ export default async function DashboardPage() {
       <Suspense
         fallback={
           <div className="grid gap-5 md:grid-cols-2">
-            <SkeletonCard />
-            <SkeletonCard />
+            {/* <SkeletonCard />
+            <SkeletonCard /> */}
           </div>
         }
       >

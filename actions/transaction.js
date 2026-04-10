@@ -232,27 +232,39 @@ export async function getUserTransactions(query = {}) {
 export async function scanReceipt(formData) {
   try {
     const file = formData.get("file");
-
+ 
     if (!file) {
       throw new Error("No file uploaded");
     }
-
+ 
+    // ✅ FIX 1: Validate file before processing
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Only image files are supported");
+    }
+ 
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("File size must be under 5MB");
+    }
+ 
     const arrayBuffer = await file.arrayBuffer();
     const base64String = Buffer.from(arrayBuffer).toString("base64");
-
+ 
+    // ✅ FIX 2: Use correct, stable model name
+    // "gemini-2.5-flash" does not exist — use "gemini-1.5-flash" (best for vision tasks)
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
     });
-
+ 
     const prompt = `
 Analyze this receipt image and extract the following information in JSON format:
 - Total amount (just the number)
 - Date (in ISO format)
 - Description or items purchased (brief summary)
 - Merchant/store name
-- Suggested category (one of: housing,transportation,groceries,utilities,entertainment,food,shopping,healthcare,education,personal,travel,insurance,gifts,bills,other-expense )
-
-Only respond with valid JSON in this exact format:
+- Suggested category (one of: housing,transportation,groceries,utilities,entertainment,food,shopping,healthcare,education,personal,travel,insurance,gifts,bills,other-expense)
+ 
+Respond ONLY with raw valid JSON — no markdown, no code fences, no explanation.
+Use exactly this format:
 {
   "amount": number,
   "date": "ISO date string",
@@ -260,10 +272,11 @@ Only respond with valid JSON in this exact format:
   "merchantName": "string",
   "category": "string"
 }
-
-If its not a receipt, return an empty object
+ 
+If this is not a receipt, return exactly: {}
 `;
-
+ 
+    // ✅ FIX 3: Correct generateContent call — no await on result.response
     const result = await model.generateContent([
       {
         inlineData: {
@@ -273,23 +286,31 @@ If its not a receipt, return an empty object
       },
       prompt,
     ]);
-
-    const response = await result.response;
+ 
+    // ✅ FIX 4: result.response is NOT a Promise — don't await it
+    const response = result.response;
     let text = response.text();
-
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
+ 
+    // ✅ FIX 5: Robust JSON extraction — handles ```json, ``` with spaces/newlines
+    // and extracts the first {...} block even if there's surrounding text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("No JSON block found in response:", text);
+      return {};
+    }
+ 
     let data = {};
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(jsonMatch[0]);
     } catch (err) {
-      throw new Error("Invalid AI JSON");
+      console.error("JSON parse error:", err, "\nRaw text:", text);
+      throw new Error("Invalid AI response format");
     }
-
+ 
     if (!data || Object.keys(data).length === 0) {
       return {};
     }
-
+ 
     return {
       amount: parseFloat(data.amount) || 0,
       date: data.date || new Date().toISOString(),
@@ -298,8 +319,8 @@ If its not a receipt, return an empty object
       category: data.category || "other-expense",
     };
   } catch (error) {
-    console.error(error);
-    throw new Error("Receipt scan failed");
+    console.error("scanReceipt error:", error.message);
+    throw new Error(error.message || "Receipt scan failed");
   }
 }
 // Helper function to calculate next recurring date

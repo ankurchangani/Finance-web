@@ -4,16 +4,15 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BarChart2, ArrowUpRight } from "lucide-react";
 import { RouteChangeLoader } from "./_components/route-change-loader";
-import { DashBarLoader } from "./loading";
+import DashboardLoading from "./loading";
 
 export default function DashboardLayout({ children }) {
   return (
     <>
       <RouteChangeLoader />
 
-      <div className="min-h-screen bg-slate-50 dark:bg-[hsl(222,22%,7%)]">
-        <div className="px-4 sm:px-6 lg:px-10 py-6 max-w-7xl mx-auto">
-
+      <div className="min-h-screen bg-slate-50 dark:bg-[hsl(222,22%,7%)] ">
+        <div className="px-4 sm:px-6 lg:px-8 xl:px-10 py-20 sm:py-20 md:py-24 lg:py-28 xl:py-32 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>
@@ -40,7 +39,7 @@ export default function DashboardLayout({ children }) {
           <Suspense
             fallback={
               <div className="space-y-4">
-                <DashBarLoader />
+                <DashboardLoading />
                 <div className="h-32 rounded-2xl bg-white dark:bg-slate-800/60 animate-pulse border border-slate-200 dark:border-slate-700/50" />
               </div>
             }
