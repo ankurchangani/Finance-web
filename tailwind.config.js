@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Keep class-based dark mode — the layout always adds `dark` to <html>
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,jsx}",
@@ -9,13 +10,9 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // ── Custom Font Families ──
       fontFamily: {
-        // Titles, headings, display text
         montserrat: ["var(--font-montserrat)", "sans-serif"],
-        // Body, paragraphs, UI text
         poppins: ["var(--font-poppins)", "sans-serif"],
-        // Keep sans as Poppins by default
         sans: ["var(--font-poppins)", "sans-serif"],
       },
       borderRadius: {

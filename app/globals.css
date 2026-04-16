@@ -2,44 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 84% 39%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 40%;
-    --accent: 190 95% 39%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
-    --chart-2: 160 84% 39%;
-    --chart-3: 43 96% 56%;
-    --chart-4: 280 87% 65%;
-    --chart-5: 340 82% 52%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
+    /* ── Dark-only design tokens ─────────────────────────── */
     --background: 220 20% 6%;
     --foreground: 210 40% 98%;
     --card: 220 20% 8%;
@@ -64,6 +33,31 @@ html {
     --chart-3: 43 96% 56%;
     --chart-4: 280 87% 65%;
     --chart-5: 340 82% 52%;
+    --radius: 0.5rem;
+
+    /* ── Semantic tokens — Finovexa dark ──────────────────── */
+    --nav-bg: rgba(7, 10, 18, 0.75);
+    --nav-bg-scrolled: rgba(7, 10, 18, 0.92);
+    --nav-border: rgba(34, 189, 253, 0.12);
+    --nav-link: rgba(255, 255, 255, 0.7);
+    --nav-shadow-scrolled: 0 4px 30px rgba(0, 0, 0, 0.5);
+
+    --sidebar-bg: linear-gradient(135deg, #070a12 0%, #0d1117 50%, #070d14 100%);
+    --sidebar-border: rgba(34, 189, 253, 0.15);
+    --sidebar-shadow: -20px 0 60px rgba(0, 0, 0, 0.8), -4px 0 20px rgba(34, 189, 253, 0.08);
+    --sidebar-link-border: rgba(255, 255, 255, 0.07);
+    --sidebar-link-color: rgba(255, 255, 255, 0.7);
+    --sidebar-top-border: rgba(255, 255, 255, 0.08);
+    --sidebar-bottom-border: rgba(255, 255, 255, 0.08);
+
+    --icon-btn-bg: rgba(255, 255, 255, 0.05);
+    --icon-btn-border: rgba(255, 255, 255, 0.1);
+    --icon-btn-color: rgba(255, 255, 255, 0.8);
+
+    --close-btn-color: rgba(255, 255, 255, 0.5);
+    --label-color: rgba(255, 255, 255, 0.3);
+
+    --hero-bg: linear-gradient(135deg, #070a12 0%, #0a1628 40%, #070d14 100%);
   }
 }
 
@@ -73,48 +67,15 @@ html {
   }
   body {
     @apply bg-background text-foreground;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: Arial, Helvetica, sans-serif;
   }
 }
 
-/* ── Light mode page background ─────────────────────────── */
-/* Your pages use inline dark backgrounds (#070a12 etc).
-   These overrides make sure the page body and sections respond
-   to the .dark toggle without touching every component. */
-
-html:not(.dark) body {
-  background: #f8fafc;
-  color: #0f172a;
-}
-
-/* Hero / full-bleed dark sections adapt in light mode */
-html:not(.dark) [data-theme-section="hero"] {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #f8fafc 100%) !important;
-}
-
-/* Card surfaces */
-html:not(.dark) .glass-card,
-html:not(.dark) [class*="bg-white/"],
-html:not(.dark) [class*="bg-black/"] {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(14, 165, 233, 0.15) !important;
-}
-
-/* ── Smooth theme transition on all elements ─────────────── */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-  transition-duration: 0.25s;
-  transition-timing-function: ease;
-}
-
-/* Exclude transitions on animated elements to avoid jank */
-[class*="animate-"],
-[style*="animation"],
-canvas,
-video {
-  transition: none !important;
+/* ── Glass card utility ────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(34, 189, 253, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 @layer utilities {
