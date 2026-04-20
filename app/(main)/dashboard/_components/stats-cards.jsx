@@ -8,24 +8,24 @@ function StatCard({ title, value, subtitle, icon: Icon, accent, trend, delay = 0
     <div
       className={cn(
         "group relative rounded-2xl p-5 overflow-hidden cursor-default",
-        "bg-white dark:bg-slate-800/70",
-        "border border-slate-200/80 dark:border-slate-700/50",
-        "hover:border-slate-300 dark:hover:border-slate-600",
-        "hover:-translate-y-1 hover:shadow-xl",
+        "bg-slate-800/70",
+        "border border-slate-700/50",
+        "hover:border-slate-600",
+        "hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/40",
         "transition-all duration-300 ease-out",
         "animate-[float-up_0.5s_ease_both]"
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      {/* Top accent line — animates in on hover */}
+      {/* Top accent line */}
       <div
         className="absolute top-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
         style={{ background: `linear-gradient(90deg, ${accent}, ${accent}44)` }}
       />
 
-      {/* Subtle glow behind icon */}
+      {/* Glow blob */}
       <div
-        className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-300"
+        className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-5 group-hover:opacity-15 transition-opacity duration-300"
         style={{ background: accent }}
       />
 
@@ -47,8 +47,8 @@ function StatCard({ title, value, subtitle, icon: Icon, accent, trend, delay = 0
               "flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full border",
               "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
               trend >= 0
-                ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-                : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border-red-500/20"
             )}
           >
             {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -57,16 +57,14 @@ function StatCard({ title, value, subtitle, icon: Icon, accent, trend, delay = 0
         )}
       </div>
 
-      <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">
         {title}
       </p>
-      <p
-        className="text-2xl font-black text-slate-900 dark:text-white tabular-nums transition-all duration-300 group-hover:scale-[1.02] origin-left"
-      >
+      <p className="text-2xl font-black text-white tabular-nums transition-all duration-300 group-hover:scale-[1.02] origin-left">
         {value}
       </p>
       {subtitle && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{subtitle}</p>
+        <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
       )}
     </div>
   );

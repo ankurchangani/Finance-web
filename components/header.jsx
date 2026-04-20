@@ -26,7 +26,6 @@ import {
 
 const NAV_LINKS = ["Features", "About", "FAQ"];
 
-// ── Finovexa wordmark — always dark-mode white→cyan gradient ─
 const Finovexa = () => (
   <span
     className="select-none font-extrabold tracking-tight leading-none"
@@ -44,7 +43,6 @@ const Finovexa = () => (
   </span>
 );
 
-// ── Desktop Login/Signup pill toggle ───────────────────────
 const AuthToggle = () => {
   const [tab, setTab] = useState("login");
 
@@ -57,7 +55,6 @@ const AuthToggle = () => {
         shadow-[0_0_20px_rgba(34,189,253,0.08)]
       "
     >
-      {/* Sliding pill */}
       <span
         className="absolute top-1 bottom-1 rounded-full pointer-events-none
           bg-gradient-to-r from-[#22BDFD] to-[#0ea5e9]
@@ -68,12 +65,11 @@ const AuthToggle = () => {
           left: tab === "login" ? "4px" : "calc(50% - 2px)",
         }}
       />
-
-      <SignInButton forceRedirectUrl="/dashboard">
+      <SignInButton>
         <button
           onMouseEnter={() => setTab("login")}
           className="relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold
-            transition-colors duration-200"
+        transition-colors duration-200"
           style={{
             color: tab === "login" ? "#ffffff" : undefined,
             fontFamily: "var(--font-poppins)",
@@ -82,15 +78,17 @@ const AuthToggle = () => {
           <span className={tab !== "login" ? "text-foreground/50" : ""}>
             <LogIn size={14} />
           </span>
-          <span className={tab !== "login" ? "text-foreground/50" : ""}>Login</span>
+          <span className={tab !== "login" ? "text-foreground/50" : ""}>
+            Login
+          </span>
         </button>
       </SignInButton>
 
-      <SignUpButton forceRedirectUrl="/dashboard">
+      <SignUpButton>
         <button
           onMouseEnter={() => setTab("signup")}
           className="relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold
-            transition-colors duration-200"
+      transition-colors duration-200"
           style={{
             color: tab === "signup" ? "#ffffff" : undefined,
             fontFamily: "var(--font-poppins)",
@@ -99,14 +97,15 @@ const AuthToggle = () => {
           <span className={tab !== "signup" ? "text-foreground/50" : ""}>
             <UserPlus size={14} />
           </span>
-          <span className={tab !== "signup" ? "text-foreground/50" : ""}>Sign Up</span>
+          <span className={tab !== "signup" ? "text-foreground/50" : ""}>
+            Sign Up
+          </span>
         </button>
       </SignUpButton>
     </div>
   );
 };
 
-// ── Main Header ─────────────────────────────────────────────
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -146,14 +145,12 @@ const Header = () => {
     });
   }, []);
 
-  // Scroll shadow
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // GSAP open animation
   useEffect(() => {
     if (!isOpen) return;
     const overlay = overlayRef.current;
@@ -189,7 +186,6 @@ const Header = () => {
     }
   }, [isOpen]);
 
-  // Escape key
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") closeSidebar(); };
     window.addEventListener("keydown", onKey);
@@ -220,8 +216,8 @@ const Header = () => {
               }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M3 14L9 4L15 14" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M5.5 10H12.5" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+                <path d="M3 14L9 4L15 14" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M5.5 10H12.5" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
               </svg>
             </div>
             <Finovexa />
@@ -332,9 +328,8 @@ const Header = () => {
         </nav>
       </header>
 
-      {/* ── MOBILE SIDEBAR ── */}
+      {/* MOBILE SIDEBAR */}
       <SignedOut>
-        {/* Backdrop */}
         <div
           ref={overlayRef}
           onClick={closeSidebar}
@@ -342,7 +337,6 @@ const Header = () => {
           style={{ opacity: 0, pointerEvents: "none" }}
         />
 
-        {/* Sidebar panel */}
         <div
           ref={sidebarRef}
           className="fixed top-0 right-0 z-[999] h-full w-[85vw] max-w-sm md:hidden flex flex-col overflow-hidden"
@@ -353,7 +347,6 @@ const Header = () => {
             boxShadow: "var(--sidebar-shadow)",
           }}
         >
-          {/* Glow blobs */}
           <div
             ref={(el) => (decorRef.current[0] = el)}
             className="absolute top-[-60px] right-[-60px] w-52 h-52 rounded-full pointer-events-none"
@@ -371,7 +364,6 @@ const Header = () => {
             }}
           />
 
-          {/* Sidebar top */}
           <div
             className="flex items-center justify-between px-6 pt-6 pb-4"
             style={{ borderBottom: "1px solid var(--sidebar-top-border)" }}
@@ -382,8 +374,8 @@ const Header = () => {
                 style={{ background: "linear-gradient(135deg, #22BDFD 0%, #0ea5e9 100%)" }}
               >
                 <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-                  <path d="M3 14L9 4L15 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M5.5 10H12.5" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M3 14L9 4L15 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5.5 10H12.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
               <Finovexa />
@@ -399,7 +391,6 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Nav links */}
           <nav className="flex-1 flex flex-col justify-center px-8 gap-1">
             {NAV_LINKS.map((item, i) => (
               <div key={i} ref={(el) => (linksRef.current[i] = el)}>
@@ -429,7 +420,6 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Auth CTA */}
           <div
             ref={loginRef}
             className="px-8 pb-12 pt-6 space-y-3"
@@ -458,8 +448,7 @@ const Header = () => {
                 }}
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  <LogIn size={15} />
-                  Login
+                  <LogIn size={15} /> Login
                 </span>
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -480,15 +469,10 @@ const Header = () => {
                   color: "#22BDFD",
                   fontFamily: "var(--font-poppins)",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(34,189,253,0.15)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(34,189,253,0.08)";
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(34,189,253,0.15)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(34,189,253,0.08)"; }}
               >
-                <UserPlus size={15} />
-                Create Account
+                <UserPlus size={15} /> Create Account
               </button>
             </SignUpButton>
           </div>

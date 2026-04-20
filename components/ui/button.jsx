@@ -1,15 +1,17 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium " +
+  "transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring " +
+  "disabled:pointer-events-none disabled:opacity-50 " +
+  "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        // ── Shadcn defaults ──────────────────────────────────────
+        // ── ShadCN defaults (untouched) ───────────────────────
         default:
           "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive:
@@ -23,43 +25,73 @@ const buttonVariants = cva(
         link:
           "text-primary underline-offset-4 hover:underline",
 
-        // ── Finovexa custom variants ─────────────────────────────
+        // ── Finovexa Blue Theme Variants ─────────────────────
 
         /**
-         * "primary" — gradient CTA button
-         * Light: vivid blue→purple on white text
-         * Dark:  same gradient, slightly stronger glow
+         * "primary" — cyan → blue → indigo gradient CTA
          */
         primary:
-          "relative overflow-hidden border border-transparent text-white " +
-          "bg-gradient-to-r from-blue-500 to-purple-600 " +
-          "shadow-md shadow-blue-500/20 " +
-          "hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 " +
-          "active:scale-100 will-change-transform " +
-          "transition-all duration-300 ease-in-out " +
-          // dark mode: stronger glow
-          "dark:shadow-blue-400/25 dark:hover:shadow-blue-400/40",
+          "relative overflow-hidden text-white font-semibold " +
+          "bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 " +
+          "border border-cyan-400/25 " +
+          "shadow-[0_4px_22px_rgba(34,211,238,0.30),inset_0_1px_0_rgba(255,255,255,0.12)] " +
+          "hover:shadow-[0_8px_36px_rgba(34,211,238,0.48),inset_0_1px_0_rgba(255,255,255,0.16)] " +
+          "hover:from-cyan-400 hover:via-blue-500 hover:to-indigo-500 " +
+          "hover:scale-[1.04] hover:-translate-y-0.5 " +
+          "active:scale-[0.97] active:translate-y-0 " +
+          "will-change-transform transition-all duration-200 ease-out",
 
         /**
-         * "glass" — frosted-glass secondary button
-         * Light: white/10 with dark text + subtle border
-         * Dark:  white/10 with white text + cyan border
+         * "glass" — frosted cyan glass button
          */
         glass:
-          "border backdrop-blur-lg " +
-          // Light mode
-          "bg-sky-500/10 border-sky-400/25 text-sky-700 " +
-          "hover:bg-sky-500/20 hover:border-sky-400/40 hover:text-sky-800 " +
-          // Dark mode
-          "dark:bg-white/10 dark:border-white/20 dark:text-white " +
-          "dark:hover:bg-white/20 dark:hover:border-white/30 " +
-          "hover:scale-105 active:scale-100 " +
-          "will-change-transform transition-all duration-300 ease-in-out",
+          "backdrop-blur-lg " +
+          "bg-[rgba(34,211,238,0.06)] border border-cyan-400/20 text-cyan-300 " +
+          "shadow-[0_2px_16px_rgba(34,211,238,0.10),inset_0_1px_0_rgba(255,255,255,0.04)] " +
+          "hover:bg-[rgba(34,211,238,0.12)] hover:border-cyan-400/35 hover:text-cyan-200 " +
+          "hover:shadow-[0_6px_28px_rgba(34,211,238,0.20)] " +
+          "hover:scale-[1.03] hover:-translate-y-0.5 " +
+          "active:scale-[0.97] active:translate-y-0 " +
+          "will-change-transform transition-all duration-200 ease-out",
+
+        /**
+         * "blue" — solid blue button, no gradient
+         */
+        blue:
+          "bg-blue-600 text-white border border-blue-500/40 " +
+          "shadow-[0_4px_20px_rgba(59,130,246,0.30),inset_0_1px_0_rgba(255,255,255,0.10)] " +
+          "hover:bg-blue-500 " +
+          "hover:shadow-[0_8px_32px_rgba(59,130,246,0.45)] " +
+          "hover:scale-[1.03] hover:-translate-y-0.5 " +
+          "active:scale-[0.97] active:translate-y-0 " +
+          "will-change-transform transition-all duration-200 ease-out",
+
+        /**
+         * "indigo" — indigo → purple gradient
+         */
+        indigo:
+          "text-white bg-gradient-to-r from-indigo-500 via-violet-600 to-purple-600 " +
+          "border border-indigo-400/25 " +
+          "shadow-[0_4px_22px_rgba(99,102,241,0.30),inset_0_1px_0_rgba(255,255,255,0.10)] " +
+          "hover:shadow-[0_8px_36px_rgba(99,102,241,0.50)] " +
+          "hover:scale-[1.04] hover:-translate-y-0.5 " +
+          "active:scale-[0.97] active:translate-y-0 " +
+          "will-change-transform transition-all duration-200 ease-out",
+
+        /**
+         * "ghost-blue" — transparent with blue border on hover
+         */
+        "ghost-blue":
+          "bg-transparent border border-transparent text-blue-400/70 " +
+          "hover:bg-blue-500/08 hover:border-blue-500/30 hover:text-blue-300 " +
+          "active:scale-[0.97] " +
+          "will-change-transform transition-all duration-200 ease-out",
       },
       size: {
         default: "h-9 px-4 py-2",
-        sm:      "h-8 rounded-md px-3 text-xs",
-        lg:      "h-10 rounded-md px-8",
+        sm:      "h-8 rounded-lg px-3 text-xs",
+        md:      "h-10 rounded-xl px-5",
+        lg:      "h-12 rounded-xl px-8 text-base",
         icon:    "h-9 w-9",
       },
     },

@@ -151,7 +151,7 @@ const LandingPage = () => {
                         </div>
                       </div>
                     </div>
-
+                    
                     <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
                       {testimonial.quote}
                     </p>

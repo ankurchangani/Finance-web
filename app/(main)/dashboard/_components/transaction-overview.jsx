@@ -2,47 +2,28 @@
 
 import { useState } from "react";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from "recharts";
 import { format } from "date-fns";
 import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-// ── Only red shades for the chart ──
 const COLORS = [
-  "#FF0000",
-  "#CC0000",
-  "#FF3333",
-  "#990000",
-  "#FF6666",
-  "#800000",
-  "#FF9999",
+  "#FF0000", "#CC0000", "#FF3333", "#990000",
+  "#FF6666", "#800000", "#FF9999",
 ];
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-popover border border-border rounded-xl px-4 py-3 shadow-2xl backdrop-blur-sm">
-        <p className="text-red-500 font-semibold text-sm mb-1">
-          {payload[0].name}
-        </p>
-        <p className="text-foreground font-bold text-lg">
-          ${payload[0].value.toFixed(2)}
-        </p>
+      <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 shadow-2xl">
+        <p className="text-red-400 font-semibold text-sm mb-1">{payload[0].name}</p>
+        <p className="text-white font-bold text-lg">${payload[0].value.toFixed(2)}</p>
       </div>
     );
   }
@@ -57,7 +38,7 @@ const CustomLegend = ({ payload }) => (
           className="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-125"
           style={{ backgroundColor: entry.color }}
         />
-        <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+        <span className="text-xs text-slate-400 group-hover:text-slate-200 transition-colors duration-200">
           {entry.value}
         </span>
       </div>
@@ -115,22 +96,22 @@ export function DashboardOverview({ accounts, transactions }) {
   return (
     <div className="grid gap-5 md:grid-cols-2">
 
-      {/* ── Recent Transactions — uses CSS variable theme ── */}
-      <Card className="bg-card border border-border rounded-2xl overflow-hidden shadow-md">
+      {/* Recent Transactions */}
+      <Card className="bg-slate-800/70 border border-slate-700/50 rounded-2xl overflow-hidden shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 pt-5 px-5">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-              <Wallet className="w-4 h-4 text-muted-foreground" />
+            <div className="w-8 h-8 rounded-lg bg-slate-700/60 flex items-center justify-center">
+              <Wallet className="w-4 h-4 text-slate-400" />
             </div>
-            <CardTitle className="text-sm font-semibold text-card-foreground tracking-wide uppercase">
+            <CardTitle className="text-sm font-semibold text-slate-300 tracking-wide uppercase">
               Recent Transactions
             </CardTitle>
           </div>
           <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-            <SelectTrigger className="w-[130px] h-8 text-xs">
+            <SelectTrigger className="w-[130px] h-8 text-xs bg-slate-700/60 border-slate-600 text-slate-300">
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-800 border-slate-700 text-slate-300">
               {accounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
                   {account.name}
@@ -143,7 +124,7 @@ export function DashboardOverview({ accounts, transactions }) {
         <CardContent className="px-5 pb-5">
           <div className="space-y-1">
             {recentTransactions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-10 text-slate-500">
                 <Wallet className="w-10 h-10 mb-3 opacity-30" />
                 <p className="text-sm">No recent transactions</p>
               </div>
@@ -155,7 +136,7 @@ export function DashboardOverview({ accounts, transactions }) {
                   onMouseLeave={() => setHoveredTx(null)}
                   className={cn(
                     "flex items-center justify-between px-3 py-3 rounded-xl cursor-default transition-all duration-200",
-                    hoveredTx === transaction.id ? "bg-muted" : "hover:bg-muted/50"
+                    hoveredTx === transaction.id ? "bg-slate-700/50" : "hover:bg-slate-700/30"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -163,8 +144,8 @@ export function DashboardOverview({ accounts, transactions }) {
                       className={cn(
                         "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200",
                         transaction.type === "EXPENSE"
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-secondary/20 text-secondary",
+                          ? "bg-red-500/15 text-red-400"
+                          : "bg-blue-500/15 text-blue-400",
                         hoveredTx === transaction.id && "scale-110"
                       )}
                     >
@@ -175,10 +156,10 @@ export function DashboardOverview({ accounts, transactions }) {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-card-foreground leading-none mb-1">
+                      <p className="text-sm font-medium text-slate-200 leading-none mb-1">
                         {transaction.description || "Untitled Transaction"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-slate-500">
                         {format(new Date(transaction.date), "PP")}
                       </p>
                     </div>
@@ -187,9 +168,7 @@ export function DashboardOverview({ accounts, transactions }) {
                   <div
                     className={cn(
                       "text-sm font-bold tabular-nums transition-all duration-200",
-                      transaction.type === "EXPENSE"
-                        ? "text-destructive"
-                        : "text-secondary",
+                      transaction.type === "EXPENSE" ? "text-red-400" : "text-blue-400",
                       hoveredTx === transaction.id && "scale-105"
                     )}
                   >
@@ -203,17 +182,17 @@ export function DashboardOverview({ accounts, transactions }) {
         </CardContent>
       </Card>
 
-      {/* ── Expense Breakdown — red chart only ── */}
-      <Card className="bg-card border border-border rounded-2xl overflow-hidden shadow-md">
+      {/* Expense Breakdown */}
+      <Card className="bg-slate-800/70 border border-slate-700/50 rounded-2xl overflow-hidden shadow-md">
         <CardHeader className="pt-5 px-5 pb-2">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-700/60 flex items-center justify-center">
               <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
               </svg>
             </div>
-            <CardTitle className="text-sm font-semibold text-card-foreground tracking-wide uppercase">
+            <CardTitle className="text-sm font-semibold text-slate-300 tracking-wide uppercase">
               Monthly Expense Breakdown
             </CardTitle>
           </div>
@@ -221,8 +200,8 @@ export function DashboardOverview({ accounts, transactions }) {
 
         <CardContent className="p-0 pb-5">
           {pieChartData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-700 flex items-center justify-center mb-3">
                 <span className="text-2xl opacity-30">$</span>
               </div>
               <p className="text-sm">No expenses this month</p>

@@ -2,14 +2,22 @@ import arcjet, { createMiddleware, detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// ✅ Protected routes - આ routes માં login જોઈએ
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/account(.*)",
   "/transaction(.*)",
 ]);
 
-// ✅ Arcjet - Bot protection & Shield
+// ✅ Sign-in/up routes ને exclude કરો — infinite loop avoid
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/features(.*)",
+  "/about(.*)",
+  "/faq(.*)",
+]);
+
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
@@ -21,20 +29,24 @@ const aj = arcjet({
   ],
 });
 
-// ✅ Clerk - Auth check
 const clerk = clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
-  // User logged in નથી + protected route છે → Sign-in redirect
+  // ✅ Public routes — સૌ access કરી શકે
+  if (isPublicRoute(req)) {
+    return NextResponse.next();
+  }
+
+  // ✅ NOT logged in + protected page → sign-in
   if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn(); // Login પછી same page પર પાછો આવે
+    return redirectToSignIn({
+      returnBackUrl: req.nextUrl.pathname,
+    });
   }
 
   return NextResponse.next();
 });
 
-// ✅ Arcjet + Clerk combine
 export default createMiddleware(aj, clerk);
 
 export const config = {
