@@ -1,7 +1,7 @@
 import { subDays, subMonths } from "date-fns";
 
 /**
- * Returns the start Date for the given range, or null for "ALL".
+ * Returns the start Date for the given range string, or null for "ALL".
  * @param {string} range - "7D" | "30D" | "90D" | "6M" | "1Y" | "ALL"
  * @returns {Date | null}
  */

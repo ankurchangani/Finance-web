@@ -1,173 +1,191 @@
-// app/(route)/ai-insights/loading.jsx
-
 export default function Loading() {
   return (
-   <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-[#080810] text-white relative overflow-hidden">
 
-      {/* ── Top progress bar ── */}
-      <div className="fixed top-0 left-0 right-0 z-[9999] h-[3px] bg-muted overflow-hidden">
-        <div className="h-full relative" style={{
-          background: "linear-gradient(90deg, #8b5cf6, #6366f1, #06b6d4)",
-          animation: "dash-bar 2s cubic-bezier(0.4,0,0.2,1) infinite",
-        }}>
-          {/* shimmer overlay */}
-          <span className="absolute inset-0 w-20" style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)",
-            animation: "dash-shimmer 1.4s ease-in-out infinite",
-          }} />
-        </div>
+      {/* Background blobs */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-violet-600/8 blur-[130px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full bg-blue-600/8 blur-[110px]" />
       </div>
 
       <style>{`
-        @keyframes dash-bar {
-          0%   { width: 0%;   margin-left: 0%;   opacity: 1; }
-          60%  { width: 80%;  margin-left: 5%;   opacity: 1; }
-          95%  { width: 95%;  margin-left: 3%;   opacity: 1; }
-          100% { width: 100%; margin-left: 0%;   opacity: 0; }
+        @keyframes shimmer {
+          0%   { background-position: -600px 0; }
+          100% { background-position: 600px 0; }
         }
-        @keyframes dash-shimmer {
-          0%   { transform: translateX(-100%); }
-          100% { transform: translateX(2000%); }
+        .sk {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.03) 25%,
+            rgba(255,255,255,0.07) 50%,
+            rgba(255,255,255,0.03) 75%
+          );
+          background-size: 600px 100%;
+          animation: shimmer 1.8s infinite linear;
         }
-        @keyframes sk-pulse {
-          0%, 100% { opacity: 0.45; }
-          50%       { opacity: 1; }
-        }
-        .sk { animation: sk-pulse 1.6s ease-in-out infinite; }
-        .sk-d1 { animation-delay: 0.1s; }
-        .sk-d2 { animation-delay: 0.2s; }
-        .sk-d3 { animation-delay: 0.3s; }
-        .sk-d4 { animation-delay: 0.4s; }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 mt-24 space-y-12">
 
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-          <div className="space-y-2">
-            <div className="h-9 w-48 rounded-xl sk bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30" />
-            <div className="h-4 w-36 rounded-lg sk sk-d1 bg-muted" />
-          </div>
-          <div className="flex gap-2">
-            <div className="h-9 w-28 rounded-lg sk sk-d2 bg-muted/60 border" />
-            <div className="h-9 w-32 rounded-lg sk sk-d1 bg-violet-100 dark:bg-violet-900/30" />
+        {/* ── Section: Select Account ── */}
+        <div>
+          <SectionHeader iconBg="bg-violet-500/10" iconBorder="border-violet-500/20" titleW="w-36" subW="w-48" />
+          <div className="flex flex-wrap gap-2 mt-5">
+            {["w-28", "w-24", "w-32", "w-20"].map((w, i) => (
+              <div key={i} className={`h-9 ${w} rounded-xl sk border border-white/5`} />
+            ))}
           </div>
         </div>
 
-        {/* ── Stat cards row ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { w: "w-20", aw: "w-28", delay: "" },
-            { w: "w-24", aw: "w-20", delay: "sk-d1" },
-            { w: "w-16", aw: "w-24", delay: "sk-d2" },
-            { w: "w-20", aw: "w-16", delay: "sk-d3" },
-          ].map((card, i) => (
-            <div key={i} className={`rounded-2xl border bg-card p-5 space-y-3 sk ${card.delay}`}>
-              <div className="flex items-center justify-between">
-                <div className={`h-3.5 ${card.w} rounded-full bg-muted`} />
-                <div className="h-8 w-8 rounded-lg bg-muted/60" />
-              </div>
-              <div className={`h-8 ${card.aw} rounded-lg bg-muted/80`} />
-              <div className="h-3 w-20 rounded-full bg-muted/50" />
-            </div>
-          ))}
-        </div>
-
-        {/* ── Main content: chart + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-          {/* Chart area */}
-          <div className="lg:col-span-2 rounded-2xl border bg-card p-5 space-y-4 sk sk-d1">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1.5">
-                <div className="h-4 w-36 rounded-lg bg-muted" />
-                <div className="h-3 w-24 rounded-full bg-muted/60" />
-              </div>
-              <div className="flex gap-2">
-                <div className="h-7 w-16 rounded-lg bg-muted/50 border" />
-                <div className="h-7 w-16 rounded-lg bg-muted/50 border" />
-              </div>
-            </div>
-            {/* Chart bars */}
-            <div className="flex items-end gap-2 h-44 pt-4">
-              {[55, 80, 45, 90, 60, 75, 40, 85, 65, 70, 50, 88].map((h, i) => (
-                <div key={i} className="flex-1 flex flex-col justify-end gap-1">
-                  <div
-                    className="w-full rounded-t-md bg-violet-100 dark:bg-violet-900/30 sk"
-                    style={{ height: `${h}%`, animationDelay: `${i * 0.04}s` }}
-                  />
-                </div>
-              ))}
-            </div>
-            {/* X-axis labels */}
-            <div className="flex gap-2">
-              {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m) => (
-                <div key={m} className="flex-1 h-2.5 rounded-full bg-muted/40" />
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar: account cards */}
-          <div className="space-y-3 sk-d2">
-            <div className="h-4 w-28 rounded-lg bg-muted sk" />
+        {/* ── Section: Financial Overview ── */}
+        <div>
+          <SectionHeader iconBg="bg-blue-500/10" iconBorder="border-blue-500/20" titleW="w-44" subW="w-56" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
             {[
-              { bw: "w-20", delay: "" },
-              { bw: "w-16", delay: "sk-d1" },
-              { bw: "w-24", delay: "sk-d2" },
-            ].map((ac, i) => (
-              <div key={i} className={`rounded-2xl border bg-card p-4 space-y-2.5 sk ${ac.delay}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-muted/60" />
-                    <div className="h-3.5 w-20 rounded-full bg-muted" />
-                  </div>
-                  <div className="h-5 w-14 rounded-full bg-muted/50" />
+              { border: "border-emerald-500/20 bg-emerald-500/5", vw: "w-28" },
+              { border: "border-rose-500/20 bg-rose-500/5",     vw: "w-24" },
+              { border: "border-violet-500/20 bg-violet-500/5", vw: "w-20" },
+              { border: "border-cyan-500/20 bg-cyan-500/5",     vw: "w-16" },
+            ].map((s, i) => (
+              <div key={i} className={`rounded-2xl border ${s.border} p-4 text-center space-y-2`}>
+                <div className="h-2.5 w-16 rounded-full sk mx-auto" />
+                <div className={`h-5 ${s.vw} rounded-lg sk mx-auto`} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Section: Monthly Trend ── */}
+        <div>
+          <SectionHeader iconBg="bg-teal-500/10" iconBorder="border-teal-500/20" titleW="w-36" subW="w-52" />
+          <div className="flex items-end gap-4 h-32 mt-5">
+            {[65, 80, 55].map((h, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                <div className="w-full flex items-end gap-1 h-20">
+                  <div className="flex-1 rounded-t-lg sk" style={{ height: `${h}%`, minHeight: "4px" }} />
+                  <div className="flex-1 rounded-t-lg sk" style={{ height: `${100 - h}%`, minHeight: "4px" }} />
                 </div>
-                <div className={`h-6 ${ac.bw} rounded-lg bg-muted/80`} />
-                <div className="flex gap-4">
-                  <div className="h-3 w-16 rounded-full bg-muted/40" />
-                  <div className="h-3 w-16 rounded-full bg-muted/40" />
+                <div className="h-2.5 w-10 rounded-full sk" />
+              </div>
+            ))}
+            <div className="flex flex-col gap-1.5 pb-5 space-y-2">
+              <div className="h-2.5 w-14 rounded-full sk" />
+              <div className="h-2.5 w-14 rounded-full sk" />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section: Spending by Category ── */}
+        <div>
+          <SectionHeader iconBg="bg-pink-500/10" iconBorder="border-pink-500/20" titleW="w-48" subW="w-44" />
+          <div className="space-y-3 mt-5">
+            {[80, 60, 45, 35, 25, 15].map((pct, i) => (
+              <div key={i}>
+                <div className="flex justify-between items-center mb-1">
+                  <div className="h-3 w-20 rounded-full sk" />
+                  <div className="flex gap-3">
+                    <div className="h-2.5 w-10 rounded-full sk" />
+                    <div className="h-3 w-16 rounded-full sk" />
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full sk" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Recent transactions ── */}
-        <div className="rounded-2xl border bg-card p-5 space-y-4 sk sk-d2">
-          <div className="flex items-center justify-between">
-            <div className="h-4 w-40 rounded-lg bg-muted" />
-            <div className="h-7 w-16 rounded-lg bg-muted/50 border" />
-          </div>
-
-          {/* Table header */}
-          <div className="grid grid-cols-4 gap-4 pb-2 border-b">
-            {["w-12", "w-20", "w-16", "w-14"].map((w, i) => (
-              <div key={i} className={`h-3 ${w} rounded-full bg-muted/50`} />
+        {/* ── Section: Top 5 Expenses ── */}
+        <div>
+          <SectionHeader iconBg="bg-rose-500/10" iconBorder="border-rose-500/20" titleW="w-32" subW="w-52" />
+          <div className="space-y-2 mt-5">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-4 rounded sk" />
+                  <div>
+                    <div className="h-3 w-28 rounded-full sk mb-1.5" />
+                    <div className="h-2.5 w-16 rounded-full sk" />
+                  </div>
+                </div>
+                <div className="h-3.5 w-16 rounded-lg sk" />
+              </div>
             ))}
           </div>
+        </div>
 
-          {/* Rows */}
-          {[
-            { icon: "bg-green-100 dark:bg-green-900/30", delay: "" },
-            { icon: "bg-red-100 dark:bg-red-900/30",   delay: "sk-d1" },
-            { icon: "bg-blue-100 dark:bg-blue-900/30",  delay: "sk-d2" },
-            { icon: "bg-amber-100 dark:bg-amber-900/30",delay: "sk-d3" },
-            { icon: "bg-violet-100 dark:bg-violet-900/30", delay: "sk-d4" },
-          ].map((row, i) => (
-            <div key={i} className={`grid grid-cols-4 gap-4 items-center py-1 sk ${row.delay}`}>
-              <div className="flex items-center gap-2">
-                <div className={`h-8 w-8 rounded-full flex-shrink-0 ${row.icon}`} />
-                <div className="h-3 w-16 rounded-full bg-muted" />
-              </div>
-              <div className="h-3 w-20 rounded-full bg-muted/60" />
-              <div className="h-5 w-14 rounded-full bg-muted/40" />
-              <div className="h-4 w-16 rounded-lg bg-muted/70 justify-self-end" />
+        {/* ── Section: Financial Health Score ── */}
+        <div>
+          <SectionHeader iconBg="bg-red-500/10" iconBorder="border-red-500/20" titleW="w-52" subW="w-48" badge />
+          <div className="flex items-center gap-6 mt-5">
+            <div className="w-24 h-24 rounded-full sk flex-shrink-0" />
+            <div className="space-y-2 flex-1">
+              <div className="h-5 w-28 rounded-lg sk" />
+              <div className="h-3 w-full rounded-full sk" />
+              <div className="h-3 w-3/4 rounded-full sk" />
+              <div className="h-1.5 w-24 rounded-full sk mt-2" />
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* ── Section: Financial Tips ── */}
+        <div>
+          <SectionHeader iconBg="bg-yellow-500/10" iconBorder="border-yellow-500/20" titleW="w-36" subW="w-44" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+                <div className="w-8 h-8 rounded-lg sk flex-shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 w-full rounded-full sk" />
+                  <div className="h-3 w-3/4 rounded-full sk" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Section: AI Insights ── */}
+        <div>
+          <SectionHeader iconBg="bg-violet-500/10" iconBorder="border-violet-500/20" titleW="w-28" subW="w-56" badge />
+
+          {/* Generate button skeleton */}
+          <div className="h-14 w-52 rounded-2xl sk mt-5 mb-8" />
+
+          {/* Insight cards skeleton */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="rounded-2xl border border-violet-500/10 bg-violet-500/5 p-5 flex gap-4 items-start">
+                <div className="w-10 h-10 rounded-xl sk flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-2.5 w-16 rounded-full sk" />
+                  <div className="h-3 w-full rounded-full sk" />
+                  <div className="h-3 w-5/6 rounded-full sk" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
+    </div>
+  );
+}
+
+// ── Reusable Section Header Skeleton ──
+function SectionHeader({ iconBg, iconBorder, titleW, subW, badge = false }) {
+  return (
+    <div className="flex items-start justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`w-9 h-9 rounded-xl ${iconBg} border ${iconBorder} flex-shrink-0 sk`} />
+        <div className="space-y-1.5">
+          <div className={`h-4 ${titleW} rounded-lg sk`} />
+          <div className={`h-3 ${subW} rounded-full sk`} />
+        </div>
+      </div>
+      {badge && (
+        <div className="h-6 w-16 rounded-full sk" />
+      )}
     </div>
   );
 }

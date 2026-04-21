@@ -1,3 +1,5 @@
+"use client";
+
 import { format, subDays } from "date-fns";
 import {
   TrendingUp, TrendingDown, AlertTriangle,
@@ -6,7 +8,7 @@ import {
 import { C, PALETTE, fmt$, fmtK, fmtPct } from "./utils";
 import { SectionHeader, ChartCard } from "./SectionHeader";
 
-// ─── Insight card data builder ────────────────────────────────────────────────
+// ── Insight builder ─────────────────────────────────────────────────────────
 function buildInsights({ kpis, categoryData, dailyAvgExpense, recurringTx, accounts }) {
   return [
     {
@@ -32,21 +34,21 @@ function buildInsights({ kpis, categoryData, dailyAvgExpense, recurringTx, accou
       color: C.amber,
       title: "Top Spending Category",
       body:  categoryData[0]
-        ? `"${categoryData[0].name}" is your largest expense at ${fmt$(categoryData[0].value)} (${fmtPct(categoryData[0].value / (kpis.expense || 1) * 100)} of total).`
+        ? `"${categoryData[0].name}" is your largest expense at ${fmt$(categoryData[0].value)} (${fmtPct((categoryData[0].value / (kpis.expense || 1)) * 100)} of total).`
         : "No expense data for this period.",
     },
     {
-      icon:  dailyAvgExpense > 200 ? AlertTriangle : CheckCircle,
-      color: dailyAvgExpense > 200 ? C.red : C.emerald,
+      icon:  dailyAvgExpense > 2000 ? AlertTriangle : CheckCircle,
+      color: dailyAvgExpense > 2000 ? C.red : C.emerald,
       title: "Daily Spending Average",
-      body:  `Average ${fmt$(dailyAvgExpense)} per day. ${dailyAvgExpense > 200 ? "Above average — consider reducing discretionary spending." : "Healthy daily spending rate."}`,
+      body:  `Average ${fmt$(dailyAvgExpense)} per day. ${dailyAvgExpense > 2000 ? "Above healthy level — consider reducing discretionary spending." : "Healthy daily spending rate."}`,
     },
     {
       icon:  recurringTx.length > 0 ? Clock : CheckCircle,
       color: C.indigo,
       title: "Recurring Transactions",
       body:  recurringTx.length > 0
-        ? `${recurringTx.length} recurring transaction(s) totaling ${fmtK(recurringTx.reduce((s, t) => s + t.amount, 0))}. Review them regularly.`
+        ? `${recurringTx.length} recurring transaction(s) totaling ${fmtK(recurringTx.reduce((s,t) => s+t.amount, 0))}. Review them regularly.`
         : "No recurring transactions in this period.",
     },
     {
@@ -60,12 +62,13 @@ function buildInsights({ kpis, categoryData, dailyAvgExpense, recurringTx, accou
   ];
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ── InsightsSection ─────────────────────────────────────────────────────────
 export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurringTx, accounts, filtered, transactions }) {
   const insights = buildInsights({ kpis, categoryData, dailyAvgExpense, recurringTx, accounts });
 
   return (
     <div className="space-y-6">
+
       {/* Insight cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {insights.map((ins, i) => (
@@ -77,7 +80,7 @@ export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurring
             <div className="flex items-start gap-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: `${ins.color}18`, border: `1px solid ${ins.color}25`, color: ins.color }}
+                style={{ background:`${ins.color}18`, border:`1px solid ${ins.color}25`, color:ins.color }}
               >
                 <ins.icon className="w-4 h-4" />
               </div>
@@ -90,44 +93,46 @@ export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurring
         ))}
       </div>
 
-      {/* Heatmap */}
+      {/* Transaction Heatmap */}
       <ChartCard>
-        <SectionHeader title="Transaction Frequency" subtitle="Last 12 weeks" icon={Calendar} accent={C.blue} />
+        <SectionHeader title="Transaction Frequency" subtitle="Last 12 weeks · hover for details" icon={Calendar} accent={C.blue} />
         <div className="overflow-x-auto">
           <div className="flex gap-1.5 min-w-max py-2">
-            {Array.from({ length: 12 }, (_, week) =>
-              Array.from({ length: 7 }, (__, day) => {
-                const d     = subDays(new Date(), (11 - week) * 7 + (6 - day));
-                const count = filtered.filter(
-                  (t) => format(new Date(t.date), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")
-                ).length;
-                return (
-                  <div
-                    key={`${week}-${day}`}
-                    className="w-5 h-5 rounded-sm transition-all duration-200 hover:scale-125 cursor-default"
-                    title={`${format(d, "MMM d")}: ${count} tx`}
-                    style={{
-                      background: count === 0
-                        ? "rgba(255,255,255,0.04)"
-                        : `rgba(34,189,253,${0.15 + Math.min(count / 5, 1) * 0.75})`,
-                      border: `1px solid rgba(255,255,255,${count === 0 ? 0.04 : 0.1})`,
-                    }}
-                  />
-                );
-              })
-            )}
+            {Array.from({ length: 12 }, (_, week) => (
+              <div key={week} className="flex flex-col gap-1.5">
+                {Array.from({ length: 7 }, (__, day) => {
+                  const d     = subDays(new Date(), (11 - week) * 7 + (6 - day));
+                  const count = filtered.filter(
+                    (t) => format(new Date(t.date), "yyyy-MM-dd") === format(d, "yyyy-MM-dd")
+                  ).length;
+                  return (
+                    <div
+                      key={day}
+                      className="w-5 h-5 rounded-sm transition-all duration-200 hover:scale-125 cursor-default"
+                      title={`${format(d, "MMM d")}: ${count} transaction${count !== 1 ? "s" : ""}`}
+                      style={{
+                        background: count === 0
+                          ? "rgba(255,255,255,0.04)"
+                          : `rgba(34,189,253,${0.15 + Math.min(count / 5, 1) * 0.75})`,
+                        border: `1px solid rgba(255,255,255,${count === 0 ? 0.04 : 0.1})`,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
           <span className="text-[10px] text-white/25 font-poppins">Less</span>
           {[0, 0.2, 0.4, 0.65, 0.85].map((o, i) => (
-            <div key={i} className="w-4 h-4 rounded-sm" style={{ background: `rgba(34,189,253,${o === 0 ? 0.04 : o})` }} />
+            <div key={i} className="w-4 h-4 rounded-sm" style={{ background: o === 0 ? "rgba(255,255,255,0.04)" : `rgba(34,189,253,${o})` }} />
           ))}
           <span className="text-[10px] text-white/25 font-poppins">More</span>
         </div>
       </ChartCard>
 
-      {/* Account summary table */}
+      {/* Account Summary Table */}
       <ChartCard>
         <SectionHeader title="Account Summary" subtitle="All accounts at a glance" icon={CreditCard} accent={C.purple} />
         <div className="overflow-x-auto">
@@ -144,15 +149,13 @@ export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurring
             <tbody>
               {accounts.map((a, i) => {
                 const aTx = transactions.filter((t) => t.accountId === a.id);
-                const avg = aTx.length ? aTx.reduce((s, t) => s + t.amount, 0) / aTx.length : 0;
+                const avg = aTx.length ? aTx.reduce((s,t) => s+t.amount, 0) / aTx.length : 0;
                 return (
                   <tr key={a.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                     <td className="py-3 pr-4">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold font-montserrat"
-                          style={{ background: `${PALETTE[i % PALETTE.length]}20`, color: PALETTE[i % PALETTE.length] }}
-                        >
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold font-montserrat"
+                          style={{ background:`${PALETTE[i%PALETTE.length]}20`, color:PALETTE[i%PALETTE.length] }}>
                           {a.name.charAt(0).toUpperCase()}
                         </div>
                         <span className="text-sm font-medium text-white font-poppins">{a.name}</span>
@@ -165,7 +168,7 @@ export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurring
                     <td className="py-3">
                       {a.isDefault ? (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-montserrat"
-                          style={{ background: `${C.blue}20`, color: C.blue, border: `1px solid ${C.blue}30` }}>
+                          style={{ background:`${C.blue}20`, color:C.blue, border:`1px solid ${C.blue}30` }}>
                           Default
                         </span>
                       ) : (
@@ -179,6 +182,7 @@ export function InsightsSection({ kpis, categoryData, dailyAvgExpense, recurring
           </table>
         </div>
       </ChartCard>
+
     </div>
   );
 }
