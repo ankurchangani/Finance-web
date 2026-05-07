@@ -127,8 +127,7 @@ html {
       rgba(99, 102, 241, 0.04) 100%
     );
   }
-
-  /* Blue glow shadow for cards */
+  
   .card-glow {
     box-shadow:
       0 4px 32px rgba(59, 130, 246, 0.12),

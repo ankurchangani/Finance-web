@@ -4,141 +4,339 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
 
-// ─── Generate Insights ──────────────────────────────────────
+// ─────────────────────────────────────────────
+// AI RESPONSE HELPER
+// ─────────────────────────────────────────────
+
+async function generateAIResponse(prompt) {
+  const models = [
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-lite",
+    "gemini-2.0-flash",
+  ];
+
+  let lastError = null;
+
+  for (const modelName of models) {
+    try {
+      console.log(`🚀 Trying model: ${modelName}`);
+
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+      });
+
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+      });
+
+      const response = result.response.text();
+
+      if (!response || response.trim().length === 0) {
+        throw new Error("Empty AI response");
+      }
+
+      console.log(`✅ Success with ${modelName}`);
+
+      return response;
+    } catch (error) {
+      console.error(`❌ ${modelName} failed`);
+
+      lastError = error;
+
+      // retry delay
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1500)
+      );
+    }
+  }
+
+  throw lastError;
+}
+
+// ─────────────────────────────────────────────
+// GENERATE INSIGHTS
+// ─────────────────────────────────────────────
+
 export async function generateInsights(transactions) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // safety check
+    if (
+      !transactions ||
+      !Array.isArray(transactions) ||
+      transactions.length === 0
+    ) {
+      return {
+        success: false,
+        data: `
+• No transaction data found
+• Add income and expense entries
+• AI analysis requires transaction history
+• Start tracking your spending daily
+• Insights will improve with more data
+• Try adding at least 5 transactions
+`,
+      };
+    }
 
-    const last90 = transactions.slice(-90);
-    const totalIncome = last90.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
-    const totalExpenses = last90.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
+    // latest 30 transactions only
+    const last30 = transactions.slice(0, 30);
+
+    const totalIncome = last30
+      .filter((t) => t.type === "INCOME")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const totalExpenses = last30
+      .filter((t) => t.type === "EXPENSE")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const netSavings =
+      totalIncome - totalExpenses;
+
+    // reduce token usage
+    const cleanedTransactions = last30.map(
+      (t) => ({
+        amount: t.amount,
+        type: t.type,
+        category: t.category,
+        description: t.description || "",
+      })
+    );
 
     const prompt = `
-You are a smart, empathetic financial advisor AI.
+You are an advanced AI financial advisor.
 
-Analyze the following user's last 3 months of transactions and give exactly 6 personalized, actionable insights.
+Analyze the user's financial behavior and generate EXACTLY 6 personalized insights.
 
 Transaction Data:
-${JSON.stringify(last90)}
+${JSON.stringify(cleanedTransactions)}
 
-Summary:
-- Total Income: ₹${totalIncome.toFixed(2)}
-- Total Expenses: ₹${totalExpenses.toFixed(2)}
-- Net Savings: ₹${(totalIncome - totalExpenses).toFixed(2)}
+Financial Summary:
+- Income: ₹${totalIncome.toFixed(2)}
+- Expenses: ₹${totalExpenses.toFixed(2)}
+- Savings: ₹${netSavings.toFixed(2)}
 
-Rules:
-- Give EXACTLY 6 bullet points, each on a new line starting with "•"
-- Reference actual categories and amounts from the data
-- Mix positive reinforcement with areas for improvement
-- Keep each insight under 2 sentences
-- Be specific and actionable — give clear next steps
-- Use ₹ symbol for Indian Rupee amounts
-- Avoid generic advice; make every insight feel personal
+STRICT RULES:
+1. EXACTLY 6 bullet points
+2. Every line must start with "•"
+3. Maximum 2 short sentences
+4. Mention real categories and amounts
+5. Give practical financial suggestions
+6. Use natural human language
+7. Use ₹ symbol
+8. No markdown
+9. No headings
+10. No numbering
+11. No extra explanation
+12. Return ONLY the 6 bullet points
+
+Example:
+• You spent ₹8,400 on food this month, which increased by 20%. Cutting weekend orders could save ₹2,000 monthly.
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response.text();
+    const response =
+      await generateAIResponse(prompt);
 
-    return { success: true, data: response };
+    return {
+      success: true,
+      data: response,
+    };
   } catch (error) {
-    console.error("Gemini generateInsights error:", error);
-    return { success: false, data: "Failed to generate AI insights. Please try again." };
+    console.error(
+      "Gemini generateInsights error:",
+      error
+    );
+
+    return {
+      success: false,
+      data: `
+• AI servers are currently busy
+• Please try again after a few seconds
+• Your transaction data is safe
+• No information was lost
+• Financial analysis will resume shortly
+• Try refreshing the page
+`,
+    };
   }
 }
 
-// ─── Translate Insights ─────────────────────────────────────
-export async function translateInsights(insights, targetLanguage) {
+// ─────────────────────────────────────────────
+// TRANSLATE INSIGHTS
+// ─────────────────────────────────────────────
+
+export async function translateInsights(
+  insights,
+  targetLanguage
+) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    if (
+      !insights ||
+      !Array.isArray(insights)
+    ) {
+      return {
+        success: false,
+        data: [],
+      };
+    }
 
     const languageNames = {
-      gu: "Gujarati (ગુજરાતી)",
-      hi: "Hindi (हिंदी)",
+      gu: "Gujarati",
+      hi: "Hindi",
     };
 
-    const langName = languageNames[targetLanguage] || "Gujarati";
-
-    const insightsText = insights.join("\n");
+    const langName =
+      languageNames[targetLanguage] ||
+      "Gujarati";
 
     const prompt = `
 Translate the following financial insights into ${langName}.
 
-Original English insights:
-${insightsText}
+${insights.join("\n")}
 
 Rules:
-- Translate each line separately, preserving the "•" bullet point at the start
-- Keep ₹ symbols and numbers as-is (do NOT translate numbers or currency symbols)
-- Keep the same meaning and tone — friendly, helpful, actionable
-- Return ONLY the translated lines, one per line, nothing else
-- Do not add any extra explanation or preamble
-- Maintain the same number of lines as the original (${insights.length} lines)
+1. Keep all bullet points
+2. Keep ₹ symbols unchanged
+3. Keep all numbers unchanged
+4. Return ONLY translated lines
+5. No headings
+6. No markdown
+7. No explanations
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response.text();
+    const response =
+      await generateAIResponse(prompt);
 
     const translated = response
       .split("\n")
-      .filter((line) => line.trim() !== "" && line.trim().length > 5);
+      .filter(
+        (line) => line.trim() !== ""
+      );
 
-    return { success: true, data: translated };
+    return {
+      success: true,
+      data: translated,
+    };
   } catch (error) {
-    console.error("Gemini translateInsights error:", error);
-    return { success: false, data: [] };
+    console.error(
+      "Gemini translateInsights error:",
+      error
+    );
+
+    return {
+      success: false,
+      data: [],
+    };
   }
 }
 
-// ─── Get User Transactions ──────────────────────────────────
+// ─────────────────────────────────────────────
+// GET USER TRANSACTIONS
+// ─────────────────────────────────────────────
+
 export async function getUserTransactions() {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-    if (!user) throw new Error("User not found");
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
 
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-
-    const transactions = await db.transaction.findMany({
-      where: { userId: user.id, date: { gte: threeMonthsAgo } },
-      orderBy: { date: "desc" },
-      select: {
-        amount: true,
-        type: true,
-        category: true,
-        date: true,
-        description: true,
-        accountId: true,
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
       },
     });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const threeMonthsAgo = new Date();
+
+    threeMonthsAgo.setMonth(
+      threeMonthsAgo.getMonth() - 3
+    );
+
+    const transactions =
+      await db.transaction.findMany({
+        where: {
+          userId: user.id,
+          date: {
+            gte: threeMonthsAgo,
+          },
+        },
+        orderBy: {
+          date: "desc",
+        },
+        select: {
+          amount: true,
+          type: true,
+          category: true,
+          date: true,
+          description: true,
+          accountId: true,
+        },
+      });
 
     return transactions.map((t) => ({
       ...t,
       amount: t.amount.toNumber(),
     }));
   } catch (error) {
-    console.error("Fetch transactions error:", error);
+    console.error(
+      "Fetch transactions error:",
+      error
+    );
+
     return [];
   }
 }
 
-// ─── Get User Accounts ──────────────────────────────────────
+// ─────────────────────────────────────────────
+// GET USER ACCOUNTS
+// ─────────────────────────────────────────────
+
 export async function getUserAccounts() {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-    if (!user) throw new Error("User not found");
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
 
     const accounts = await db.account.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, type: true, isDefault: true, balance: true },
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        isDefault: true,
+        balance: true,
+      },
     });
 
     return accounts.map((a) => ({
@@ -146,7 +344,11 @@ export async function getUserAccounts() {
       balance: a.balance.toNumber(),
     }));
   } catch (error) {
-    console.error("Fetch accounts error:", error);
+    console.error(
+      "Fetch accounts error:",
+      error
+    );
+
     return [];
   }
 }

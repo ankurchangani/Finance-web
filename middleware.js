@@ -9,40 +9,43 @@ const isProtectedRoute = createRouteMatcher([
   "/ai-insights(.*)",
 ]);
 
-// Arcjet config
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
-    shield({
-      mode: "LIVE",
-    }),
+    shield({ mode: "LIVE" }),
     detectBot({
       mode: "LIVE",
-      allow: [
-        "CATEGORY:SEARCH_ENGINE",
-        "GO_HTTP",
-      ],
+      allow: ["CATEGORY:SEARCH_ENGINE", "GO_HTTP"],
     }),
   ],
 });
 
-// Clerk middleware
-const clerk = clerkMiddleware(async (auth, req) => {
-  const { userId, redirectToSignIn } = await auth();
+const clerk = clerkMiddleware(
+  async (auth, req) => {
+    const { userId, redirectToSignIn } = await auth();
+    const { pathname } = req.nextUrl;
 
-  if (!userId && isProtectedRoute(req)) {
-    return redirectToSignIn(); // ✅ correct
-  }
+    // ✅ sign-in page પર logged in હોય તો dashboard
+    if (userId && pathname.startsWith("/sign-in")) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
-  return NextResponse.next();
-});
+    // ✅ Protected route — login જોઈએ
+    if (!userId && isProtectedRoute(req)) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
 
-// Chain middlewares
+    // ✅ બાકી બધું normal — home પર જઈ શકે
+    return NextResponse.next();
+  },
+  { clockSkewInMs: 60000 }
+);
+
 export default createMiddleware(aj, clerk);
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
 };

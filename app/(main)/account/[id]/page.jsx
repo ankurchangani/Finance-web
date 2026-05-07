@@ -1,5 +1,3 @@
-// app/account/[id]/page.jsx
-
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BarLoader } from "react-spinners";
@@ -8,16 +6,18 @@ import { AccountChart } from "../_components/account-chart";
 import { TransactionTable } from "../_components/transaction-table";
 
 export default async function AccountPage({ params }) {
-  const accountData = await getAccountWithTransactions(params.id);
+  const { id } = await params; // ✅ Next.js 15 — params is a Promise
+
+  const accountData = await getAccountWithTransactions(id);
   if (!accountData) notFound();
 
   const { transactions, ...account } = accountData;
 
   return (
-    <div className="space-y-8 px-5">
+    <div className="space-y-8 px-5 pt-16">
 
-      {/* Account Header */}
-      <div className="flex gap-4 items-end justify-between">
+      {/* ── Account Header ──────────────────────────────────── */}
+      <div className="flex gap-4 items-end justify-between mt-11">
         <div>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight gradient-title capitalize">
             {account.name}
@@ -36,14 +36,14 @@ export default async function AccountPage({ params }) {
         </div>
       </div>
 
-      {/* Income vs Expense Bar Chart */}
+      {/* ── 3-D Bar Chart ───────────────────────────────────── */}
       <Suspense
         fallback={<BarLoader className="mt-4" width="100%" color="#9333ea" />}
       >
         <AccountChart transactions={transactions} />
       </Suspense>
 
-      {/* Transaction Table */}
+      {/* ── Transaction Table ────────────────────────────────── */}
       <Suspense
         fallback={<BarLoader className="mt-4" width="100%" color="#9333ea" />}
       >

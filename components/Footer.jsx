@@ -1,5 +1,7 @@
 
+'use client';
 
+import Link from "next/link";
 export function Footer() {
   const year = new Date().getFullYear(); // ✅ dynamic — updates every year automatically
 
@@ -18,15 +20,13 @@ export function Footer() {
 
         {/* Optional links */}
         <div className="flex items-center gap-6 text-white/30 text-sm">
-          <a href="/privacy" className="hover:text-[#22BDFD] transition-colors duration-200">
+          <Link href="/privacy" className="hover:text-[#22BDFD] transition-colors duration-200">
             Privacy
-          </a>
-          <a href="/terms" className="hover:text-[#22BDFD] transition-colors duration-200">
+          </Link>
+          <Link href="/terms" className="hover:text-[#22BDFD] transition-colors duration-200">
             Terms
-          </a>
-          <a href="/contact" className="hover:text-[#22BDFD] transition-colors duration-200">
-            Contact
-          </a>
+          </Link>
+          
         </div>
       </div>
     </footer>

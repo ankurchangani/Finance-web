@@ -229,32 +229,34 @@ export async function getUserTransactions(query = {}) {
   }
 }
 
+
 export async function scanReceipt(formData) {
   try {
     const file = formData.get("file");
- 
+
     if (!file) {
       throw new Error("No file uploaded");
     }
- 
-    // ✅ FIX 1: Validate file before processing
+
+    // File validation
     if (!file.type.startsWith("image/")) {
       throw new Error("Only image files are supported");
     }
- 
+
     if (file.size > 5 * 1024 * 1024) {
       throw new Error("File size must be under 5MB");
     }
- 
+
     const arrayBuffer = await file.arrayBuffer();
     const base64String = Buffer.from(arrayBuffer).toString("base64");
- 
-    // ✅ FIX 2: Use correct, stable model name
-    // "gemini-2.5-flash" does not exist — use "gemini-1.5-flash" (best for vision tasks)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
- 
+
+    // ✅ AI models fallback system
+    const models = [
+      "gemini-2.5-flash-lite",
+      "gemini-2.0-flash-lite",
+      "gemini-2.0-flash",
+    ];
+
     const prompt = `
 Analyze this receipt image and extract the following information in JSON format:
 - Total amount (just the number)
@@ -275,54 +277,91 @@ Use exactly this format:
  
 If this is not a receipt, return exactly: {}
 `;
- 
-    // ✅ FIX 3: Correct generateContent call — no await on result.response
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType: file.type,
-          data: base64String,
-        },
-      },
-      prompt,
-    ]);
- 
-    // ✅ FIX 4: result.response is NOT a Promise — don't await it
-    const response = result.response;
-    let text = response.text();
- 
-    // ✅ FIX 5: Robust JSON extraction — handles ```json, ``` with spaces/newlines
-    // and extracts the first {...} block even if there's surrounding text
+    let text = "";
+
+    // ✅ Try models one by one
+    for (const modelName of models) {
+      try {
+        console.log("Trying model:", modelName);
+
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+        });
+
+        const result = await model.generateContent([
+          {
+            inlineData: {
+              mimeType: file.type,
+              data: base64String,
+            },
+          },
+          prompt,
+        ]);
+
+        const response = result.response;
+        text = response.text();
+
+        // Success
+        if (text) {
+          console.log("Success with:", modelName);
+          break;
+        }
+      } catch (err) {
+        console.log(`Model ${modelName} failed`);
+
+        // Continue to next model
+        continue;
+      }
+    }
+
+    // No AI response
+    if (!text) {
+      throw new Error("All Gemini models failed");
+    }
+
+    // Extract JSON
     const jsonMatch = text.match(/\{[\s\S]*\}/);
+
     if (!jsonMatch) {
-      console.error("No JSON block found in response:", text);
+      console.error("No JSON found:", text);
       return {};
     }
- 
+
     let data = {};
+
     try {
       data = JSON.parse(jsonMatch[0]);
     } catch (err) {
-      console.error("JSON parse error:", err, "\nRaw text:", text);
-      throw new Error("Invalid AI response format");
+      console.error("JSON parse error:", err);
+      return {};
     }
- 
+
     if (!data || Object.keys(data).length === 0) {
       return {};
     }
- 
+
     return {
-      amount: parseFloat(data.amount) || 0,
+      amount: Number(data.amount) || 0,
       date: data.date || new Date().toISOString(),
       description: data.description || "",
       merchantName: data.merchantName || "",
       category: data.category || "other-expense",
     };
   } catch (error) {
-    console.error("scanReceipt error:", error.message);
+    console.error("scanReceipt error:", error);
+
+    if (error.message.includes("429")) {
+      throw new Error("AI quota exceeded. Try again later.");
+    }
+
+    if (error.message.includes("503")) {
+      throw new Error("Gemini servers busy. Please retry.");
+    }
+
     throw new Error(error.message || "Receipt scan failed");
   }
 }
+
 // Helper function to calculate next recurring date
 function calculateNextRecurringDate(startDate, interval) {
   const date = new Date(startDate);
