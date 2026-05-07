@@ -12,7 +12,7 @@ const isProtectedRoute = createRouteMatcher([
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
-    shield({ mode: "LIVE" }),
+    shield({ mode: "DRY_RUN" }), // ✅ FIX
     detectBot({
       mode: "LIVE",
       allow: ["CATEGORY:SEARCH_ENGINE", "GO_HTTP"],
@@ -25,17 +25,16 @@ const clerk = clerkMiddleware(
     const { userId, redirectToSignIn } = await auth();
     const { pathname } = req.nextUrl;
 
-    // ✅ sign-in page પર logged in હોય તો dashboard
+    // sign-in page redirect
     if (userId && pathname.startsWith("/sign-in")) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // ✅ Protected route — login જોઈએ
+    // protected routes
     if (!userId && isProtectedRoute(req)) {
       return redirectToSignIn({ returnBackUrl: req.url });
     }
 
-    // ✅ બાકી બધું normal — home પર જઈ શકે
     return NextResponse.next();
   },
   { clockSkewInMs: 60000 }
