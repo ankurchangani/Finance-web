@@ -250,12 +250,9 @@ const Header = () => {
           {/* MOBILE RIGHT */}
           <div className="md:hidden flex items-center gap-2">
             <SignedIn>
-              <MobileIconBtn href="/spending-dna"><Dna size={15} /></MobileIconBtn>
-              <MobileIconBtn href="/cash-oracle"><Telescope size={15} /></MobileIconBtn>
-              <MobileIconBtn href="/budget-ai"><Scale size={15} /></MobileIconBtn>
-              <MobileIconBtn href="/ai-insights"><Sparkles size={15} /></MobileIconBtn>
               <MobileIconBtn href="/dashboard"><LayoutDashboard size={15} /></MobileIconBtn>
               <MobileIconBtn href="/transaction/create"><PenBox size={15} /></MobileIconBtn>
+              <MobileIconBtn href="/ai-insights"><Sparkles size={15} /></MobileIconBtn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
             <SignedOut>
