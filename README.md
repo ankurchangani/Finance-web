@@ -18,54 +18,6 @@
 | **AI** | Google Gemini API |
 | **Email** | Resend |
 
----
-
-## 📁 Project Structure
-
-```
-├── app/
-│   ├── (auth)/
-│   │   ├── sign-in/[[...sign-in]]/page.jsx
-│   │   └── sign-up/[[...sign-up]]/page.jsx
-│   ├── (main)/
-│   │   ├── dashboard/
-│   │   │   └── page.jsx
-│   │   ├── account/
-│   │   │   └── [id]/page.jsx
-│   │   └── transaction/
-│   │       └── create/page.jsx
-│   ├── onboarding/
-│   │   └── page.jsx
-│   ├── api/
-│   │   └── inngest/route.js
-│   └── layout.jsx
-├── components/
-│   ├── ui/                  ← Shadcn UI components
-│   ├── hero.jsx
-│   ├── header.jsx
-│   └── create-account-drawer.jsx
-├── actions/
-│   ├── dashboard.js
-│   ├── accounts.js
-│   ├── transactions.js
-│   └── budget.js
-├── lib/
-│   ├── prisma.js
-│   ├── inngest/
-│   │   ├── client.js
-│   │   └── functions.js
-│   ├── arcjet.js
-│   └── utils.js
-├── prisma/
-│   └── schema.prisma
-├── emails/
-│   └── template.jsx
-├── .env
-├── .env.example
-└── README.md
-```
-
----
 
 ## ⚙️ Environment Variables
 
@@ -114,8 +66,8 @@ ARCJET_KEY=ajkey_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/wealthai.git
-cd wealthai
+https://github.com/ankurchangani/Finance-web.git
+cd Finance-web
 ```
 
 ### 2. Install Dependencies
