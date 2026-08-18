@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { Brain } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

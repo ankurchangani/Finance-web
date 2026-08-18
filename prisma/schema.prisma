@@ -18,11 +18,13 @@ model User {
   name        String?
   imageUrl    String?
 
-  accounts     Account[]
-  transactions Transaction[]
-  budgets      Budget[]
-
-  goals Goal[] // 👈 AA LINE ADD KARVI
+  accounts             Account[]
+  transactions         Transaction[]
+  budgets              Budget[]
+  goals                Goal[]
+  aiAnalyses           AIAnalysis[]
+  budgetRecommendations BudgetRecommendation[]
+  financialAdvices     FinancialAdvice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,8 +79,6 @@ model Transaction {
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  // Optional link to Category model
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -103,6 +103,94 @@ model Budget {
 
   @@index([userId])
   @@map("budgets")
+}
+
+// ────────────────────────────────────────────────
+// 🎯 GOALS
+// ────────────────────────────────────────────────
+model Goal {
+  id           String    @id @default(uuid())
+  title        String
+  targetAmount Decimal
+  savedAmount  Decimal   @default(0)
+  emoji        String?   @default("🎯")
+  deadline     DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
+
+// ────────────────────────────────────────────────
+// 🤖 AI ANALYSIS - Feature 1
+// ────────────────────────────────────────────────
+model AIAnalysis {
+  id              String    @id @default(uuid())
+  transactionId   String?
+  analysisType    String    // "expense_insight", "category_recommendation", "pattern"
+  title           String
+  description     String
+  recommendation  String?
+  confidence      Float     @default(0.8) // 0-1
+  metadata        Json?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("ai_analyses")
+}
+
+// ────────────────────────────────────────────────
+// 💡 BUDGET RECOMMENDATION - Feature 2
+// ────────────────────────────────────────────────
+model BudgetRecommendation {
+  id                String    @id @default(uuid())
+  category          String
+  suggestedBudget   Decimal
+  currentSpending   Decimal
+  savingsPotential  Decimal
+  reason            String
+  implementationTip String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("budget_recommendations")
+}
+
+// ────────────────────────────────────────────────
+// 📈 FINANCIAL ADVICE - Feature 3
+// ────────────────────────────────────────────────
+model FinancialAdvice {
+  id          String   @id @default(uuid())
+  category    String   // "savings", "investment", "debt_management", "income"
+  title       String
+  advice      String
+  priority    Priority @default(MEDIUM)
+  impact      String?  // "monthly_savings", "annual_growth", etc.
+  actionItems Json?    // Array of action items
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("financial_advices")
 }
 
 // ────────────────────────────────────────────────
@@ -131,20 +219,9 @@ enum RecurringInterval {
   YEARLY
 }
 
-model Goal {
-  id           String    @id @default(uuid())
-  title        String
-  targetAmount Decimal
-  savedAmount  Decimal   @default(0)
-  emoji        String?   @default("🎯")
-  deadline     DateTime?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@map("goals")
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }

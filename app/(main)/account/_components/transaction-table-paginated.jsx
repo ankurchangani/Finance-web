@@ -31,8 +31,22 @@ import {
 } from "@/components/ui/tooltip";
 import { cn }              from "@/lib/utils";
 import { categoryColors }  from "@/data/categories";
-import { bulkDeleteTransactions, exportTransactionsCSV } from "@/actions/transaction-optimized";
+import { bulkDeleteTransactions } from "@/actions/account";
 import { TransactionTableSkeleton } from "@/components/ui/skeleton-loaders";
+
+function exportTransactionsCSV(transactions) {
+  if (!transactions || transactions.length === 0) return "";
+  const headers = ["Date", "Description", "Category", "Type", "Amount", "Recurring"];
+  const rows = transactions.map((t) => [
+    format(new Date(t.date), "yyyy-MM-dd"),
+    `"${(t.description || "").replace(/"/g, '""')}"`,
+    t.category,
+    t.type,
+    t.amount,
+    t.isRecurring ? "Yes" : "No",
+  ]);
+  return [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+}
 
 const RECURRING_INTERVALS = {
   DAILY: "Daily", WEEKLY: "Weekly",
