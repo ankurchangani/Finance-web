@@ -86,7 +86,7 @@ export function AccountCard({ account, delay = 0 }) {
 
   useEffect(() => {
     if (deleteResult?.success) toast.success(`"${name}" account deleted`);
-  }, [deleteResult]);
+  }, [deleteResult, name]);
 
   useEffect(() => {
     if (deleteError) toast.error(deleteError.message || "Failed to delete account");

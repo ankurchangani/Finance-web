@@ -106,7 +106,7 @@ function use3DTilt(ref) {
     el.addEventListener("mousemove", onMove);
     el.addEventListener("mouseleave", onLeave);
     return () => { el.removeEventListener("mousemove", onMove); el.removeEventListener("mouseleave", onLeave); };
-  }, []);
+  }, [ref]);
 }
 
 function FeatureCard({ feature, index }) {

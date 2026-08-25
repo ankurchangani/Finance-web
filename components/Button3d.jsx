@@ -45,7 +45,7 @@ const Button3D = React.forwardRef(
         el.removeEventListener("mousedown", onDown);
         el.removeEventListener("mouseup", onUp);
       };
-    }, [variant, disabled]);
+    }, [variant, disabled, resolvedRef]);
 
     return (
       <button

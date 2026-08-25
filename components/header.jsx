@@ -6,7 +6,6 @@ import gsap from "gsap";
 import {
   PenBox, LayoutDashboard, Menu, X,
   Sparkles, ChevronRight, LogIn, UserPlus,
-  Dna, Telescope, Scale,
 } from "lucide-react";
 import {
   SignedIn, SignedOut, SignInButton,
@@ -50,7 +49,7 @@ const AuthToggle = () => {
           <span className={tab !== "login" ? "text-foreground/50" : ""}>Login</span>
         </button>
       </SignInButton>
-      <SignUpButton mode="redirect" forceRedirectUrl="/onboarding">
+      <SignUpButton mode="redirect" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
         <button onMouseEnter={() => setTab("signup")}
           className="relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200"
           style={{ color: tab === "signup" ? "#ffffff" : undefined, fontFamily: "var(--font-poppins)" }}>
@@ -322,7 +321,7 @@ const Header = () => {
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(135deg, #38c8ff 0%, #22BDFD 100%)" }} />
               </button>
             </SignInButton>
-            <SignUpButton mode="redirect" forceRedirectUrl="/onboarding">
+            <SignUpButton mode="redirect" forceRedirectUrl="/dashboard" fallbackRedirectUrl="/dashboard">
               <button onClick={closeSidebar} className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 active:scale-95"
                 style={{ background: "rgba(34,189,253,0.08)", border: "1px solid rgba(34,189,253,0.3)", color: "#22BDFD", fontFamily: "var(--font-poppins)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(34,189,253,0.15)"; }}

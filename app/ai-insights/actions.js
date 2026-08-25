@@ -14,9 +14,9 @@ const genAI = new GoogleGenerativeAI(
 
 async function generateAIResponse(prompt) {
   const models = [
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
     "gemini-2.0-flash",
+    "gemini-1.5-pro",
   ];
 
   let lastError = null;
@@ -48,14 +48,8 @@ async function generateAIResponse(prompt) {
 
       return response;
     } catch (error) {
-      console.error(`❌ ${modelName} failed`);
-
+      console.error(`❌ ${modelName} failed`, error.message);
       lastError = error;
-
-      // retry delay
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1500)
-      );
     }
   }
 

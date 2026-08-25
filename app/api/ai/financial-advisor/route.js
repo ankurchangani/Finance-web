@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-export async function POST(req) {
+export async function POST() {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -59,7 +59,7 @@ Financial Profile:
 - Total Goals: ${user.goals.length} goals
 - Goal Target: $${totalGoal.toFixed(2)}
 - Amount Saved: $${totalSaved.toFixed(2)}
-- Current Budget: $${user.budgets[0]?.amount || "Not set"}
+- Current Budget: $${user.budgets[0]?.amount ? Number(user.budgets[0].amount) : "Not set"}
 
 Provide 3-4 actionable pieces of advice as JSON:
 [
@@ -73,7 +73,7 @@ Provide 3-4 actionable pieces of advice as JSON:
   }
 ]`;
 
-    const models = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
     let responseText = "";
 
     for (const modelName of models) {
@@ -120,23 +120,34 @@ Provide 3-4 actionable pieces of advice as JSON:
       ];
     }
 
+    const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+
     const savedAdvice = await Promise.all(
-      adviceList.map((advice) =>
-        db.financialAdvice.create({
+      adviceList.map((advice) => {
+        const pStr = (advice.priority || "MEDIUM").toUpperCase();
+        const priority = validPriorities.includes(pStr) ? pStr : "MEDIUM";
+        const items = advice.action_items || advice.actionItems || [];
+
+        return db.financialAdvice.create({
           data: {
             userId: user.id,
             category: advice.category || "savings",
             title: advice.title || "Financial Tip",
             advice: advice.advice || "Keep managing your budget.",
-            priority: (advice.priority || "MEDIUM").toUpperCase(),
+            priority,
             impact: advice.impact || "Positive Impact",
-            actionItems: advice.action_items || [],
+            actionItems: items,
           },
-        })
-      )
+        });
+      })
     );
 
-    return NextResponse.json(savedAdvice);
+    const formatted = savedAdvice.map((a) => ({
+      ...a,
+      action_items: a.actionItems,
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error("Financial Advisor Error:", error);
     return NextResponse.json(

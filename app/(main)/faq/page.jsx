@@ -198,7 +198,7 @@ export default function FAQSection() {
           <p className="text-blue-200/45 text-sm sm:text-base leading-relaxed max-w-lg mb-10"
             style={{ fontFamily: "var(--font-poppins,'Poppins',sans-serif)" }}>
             Everything you need to know about managing your finances with Finovexa.
-            Can't find the answer? Reach out to our support team.
+            Can&apos;t find the answer? Reach out to our support team.
           </p>
         </div>
 

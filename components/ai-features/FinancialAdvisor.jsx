@@ -1,5 +1,5 @@
-// app/components/ai-features/FinancialAdvisor.tsx
 "use client"
+
 import { useState } from "react"
 import React from "react"
 import { useGSAP } from "@gsap/react"
@@ -23,24 +23,21 @@ export function FinancialAdvisor() {
 
   useGSAP(() => {
     if (adviceList.length > 0 && containerRef.current) {
-      // Title animation
       gsap.fromTo(
         containerRef.current,
-        { opacity: 0, scale: 0.95 },
+        { opacity: 0, scale: 0.97 },
         { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }
       )
 
-      // Cards flip in
       gsap.fromTo(
         cardsRef.current,
-        { opacity: 0, rotationY: -90, y: 20 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
-          rotationY: 0,
           y: 0,
-          duration: 0.7,
-          stagger: 0.2,
-          ease: "back.out"
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "power3.out"
         }
       )
     }
@@ -63,16 +60,17 @@ export function FinancialAdvisor() {
     }
   }
 
-  const getPriorityColor = priority => {
+  const getPriorityStyle = priority => {
     switch (priority) {
       case "HIGH":
-        return "bg-red-100 text-red-800"
+      case "CRITICAL":
+        return "bg-rose-500/15 border-rose-500/30 text-rose-400 font-bold"
       case "MEDIUM":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-amber-500/15 border-amber-500/30 text-amber-400 font-bold"
       case "LOW":
-        return "bg-green-100 text-green-800"
+        return "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-bold"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-slate-700/50 border-slate-600 text-slate-300 font-bold"
     }
   }
 
@@ -93,23 +91,27 @@ export function FinancialAdvisor() {
 
   return (
     <div ref={containerRef} className="space-y-4">
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-purple-600" />
-            <CardTitle className="text-lg">AI Financial Advisor</CardTitle>
+      <Card className="border border-slate-800 bg-slate-900/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-black/80 overflow-hidden">
+        <CardHeader className="pb-4 border-b border-slate-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <Lightbulb className="w-5 h-5" />
+            </div>
+            <CardTitle className="text-lg font-bold text-slate-100">
+              AI Financial Advisor
+            </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 pt-5">
           <Button
             onClick={handleGetAdvice}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+            className="w-full py-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xl shadow-purple-900/40 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating Advice...
+                Generating Personalized Advice...
               </>
             ) : (
               <>
@@ -120,81 +122,82 @@ export function FinancialAdvisor() {
           </Button>
 
           {adviceList.length > 0 && (
-            <div className="space-y-3 mt-4">
+            <div className="space-y-4 mt-5">
               {adviceList.map((advice, idx) => (
                 <div
                   key={idx}
                   ref={el => {
                     if (el) cardsRef.current[idx] = el
                   }}
-                  className="p-4 bg-white rounded-lg border border-purple-100 hover:shadow-lg transition-all duration-300"
+                  className="p-5 bg-slate-800/60 rounded-2xl border border-slate-700/60 backdrop-blur-md hover:border-purple-500/30 transition-all duration-300 shadow-lg space-y-3.5"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl flex-shrink-0">
                         {getCategoryIcon(advice.category)}
-                      </span>
+                      </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-bold text-base text-slate-100">
                           {advice.title}
                         </h3>
                         <Badge
-                          className={`mt-1 text-xs font-semibold ${getPriorityColor(
+                          variant="outline"
+                          className={`mt-1 text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-lg ${getPriorityStyle(
                             advice.priority
                           )}`}
                         >
-                          {advice.priority}
+                          {advice.priority} Priority
                         </Badge>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-700 mb-3 pl-11">
+                  <p className="text-sm text-slate-300 leading-relaxed font-medium">
                     {advice.advice}
                   </p>
 
                   {advice.impact && (
-                    <div className="p-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded mb-3 ml-11">
-                      <p className="text-xs font-semibold text-indigo-900">
+                    <div className="p-3 bg-indigo-950/30 rounded-xl border border-indigo-500/20">
+                      <p className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider mb-0.5">
                         Expected Impact
                       </p>
-                      <p className="text-sm text-indigo-700 font-medium">
+                      <p className="text-xs font-semibold text-slate-200">
                         {advice.impact}
                       </p>
                     </div>
                   )}
 
-                  {advice.action_items && advice.action_items.length > 0 && (
-                    <div className="ml-11 space-y-1">
-                      <p className="text-xs font-semibold text-gray-600 mb-2">
-                        Action Items
-                      </p>
-                      {advice.action_items.map((action, actionIdx) => (
-                        <div
-                          key={actionIdx}
-                          className="flex items-start gap-2 text-xs text-gray-700 bg-gray-50 p-2 rounded"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span>{action}</span>
+                  {(advice.actionItems || advice.action_items) &&
+                    (advice.actionItems || advice.action_items).length > 0 && (
+                      <div className="space-y-2 pt-1">
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                          Action Items
+                        </p>
+                        <div className="space-y-1.5">
+                          {(advice.actionItems || advice.action_items).map((action, actionIdx) => (
+                            <div
+                              key={actionIdx}
+                              className="flex items-start gap-2.5 text-xs text-slate-300 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80"
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                              <span className="font-medium leading-relaxed">{action}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    )}
                 </div>
               ))}
 
-              <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200 mt-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-sm text-purple-900 mb-1">
-                      Total Recommendations
-                    </p>
-                    <p className="text-sm text-purple-800">
-                      Follow these {adviceList.length} recommendations to
-                      improve your financial health
-                    </p>
-                  </div>
+              <div className="p-4 bg-gradient-to-r from-purple-950/40 via-slate-800/80 to-slate-900/60 rounded-2xl border border-purple-500/30 backdrop-blur-md mt-4 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                <div>
+                  <p className="font-bold text-xs uppercase tracking-wider text-purple-400 mb-0.5">
+                    Strategy Summary ({adviceList.length} Insights)
+                  </p>
+                  <p className="text-xs text-slate-300 font-medium">
+                    Execute these recommended action items to steadily increase your financial health score.
+                  </p>
                 </div>
               </div>
             </div>

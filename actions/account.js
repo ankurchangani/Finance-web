@@ -49,10 +49,11 @@ export async function bulkDeleteTransactions(transactionIds) {
     });
 
     const accountBalanceChanges = transactions.reduce((acc, transaction) => {
+      const amountNum = Number(transaction.amount);
       const change =
         transaction.type === "EXPENSE"
-          ? transaction.amount
-          : -transaction.amount;
+          ? amountNum
+          : -amountNum;
       acc[transaction.accountId] = (acc[transaction.accountId] || 0) + change;
       return acc;
     }, {});

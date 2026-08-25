@@ -1,234 +1,95 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-
-const LOADING_STATUSES = [
-  "Initializing Financial AI Core...",
-  "Loading Secure Encrypted Ledger...",
-  "Syncing Real-Time Analytics...",
-  "Optimizing Smart Recommendations...",
-  "Finovexa Ready",
-];
+import React, { useEffect, useState } from "react";
 
 export function SitePreloader() {
   const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState(LOADING_STATUSES[0]);
+  const [isDone, setIsDone] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const containerRef = useRef(null);
-  const logoRef = useRef(null);
-  const progressLineRef = useRef(null);
-  const percentageRef = useRef(null);
-  const statusRef = useRef(null);
-  const ring1Ref = useRef(null);
-  const ring2Ref = useRef(null);
-  const curtainLeftRef = useRef(null);
-  const curtainRightRef = useRef(null);
-
   useEffect(() => {
-    // Only run initial loader once per session or on page refresh
-    const hasLoadedThisSession = sessionStorage.getItem("finovexa_preloader_seen");
-    if (hasLoadedThisSession) {
-      setIsLoaded(true);
-      return;
-    }
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        sessionStorage.setItem("finovexa_preloader_seen", "true");
-        setIsLoaded(true);
-      },
-    });
-
-    // 1. Initial entrance of logo & rings
-    tl.fromTo(
-      logoRef.current,
-      { scale: 0.7, opacity: 0, y: 30 },
-      { scale: 1, opacity: 1, y: 0, duration: 0.8, ease: "back.out(1.7)" }
-    );
-
-    tl.fromTo(
-      [ring1Ref.current, ring2Ref.current],
-      { scale: 0, opacity: 0 },
-      { scale: 1, opacity: 0.6, duration: 0.8, stagger: 0.2, ease: "power2.out" },
-      "-=0.6"
-    );
-
-    // Rotating ambient rings
-    gsap.to(ring1Ref.current, {
-      rotate: 360,
-      duration: 12,
-      repeat: -1,
-      ease: "none",
-    });
-    gsap.to(ring2Ref.current, {
-      rotate: -360,
-      duration: 16,
-      repeat: -1,
-      ease: "none",
-    });
-
-    // 2. Animate counter 0 -> 100
-    const counterObj = { val: 0 };
-    tl.to(counterObj, {
-      val: 100,
-      duration: 2.2,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        const currentVal = Math.floor(counterObj.val);
-        setProgress(currentVal);
-
-        // Update status text based on progress thresholds
-        if (currentVal < 25) setStatusText(LOADING_STATUSES[0]);
-        else if (currentVal < 55) setStatusText(LOADING_STATUSES[1]);
-        else if (currentVal < 80) setStatusText(LOADING_STATUSES[2]);
-        else if (currentVal < 98) setStatusText(LOADING_STATUSES[3]);
-        else setStatusText(LOADING_STATUSES[4]);
-
-        if (progressLineRef.current) {
-          progressLineRef.current.style.width = `${currentVal}%`;
+    // Start fast smooth progress sequence on mount/refresh
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsDone(true);
+          setTimeout(() => {
+            setIsLoaded(true);
+          }, 300);
+          return 100;
         }
-      },
-    });
+        return prev + 25;
+      });
+    }, 35);
 
-    // 3. Exit Animation
-    tl.to(
-      [logoRef.current, percentageRef.current, statusRef.current, ring1Ref.current, ring2Ref.current],
-      {
-        opacity: 0,
-        y: -30,
-        duration: 0.4,
-        ease: "power2.in",
-      }
-    );
-
-    tl.to(
-      curtainLeftRef.current,
-      {
-        xPercent: -100,
-        duration: 0.7,
-        ease: "power4.inOut",
-      },
-      "-=0.1"
-    );
-
-    tl.to(
-      curtainRightRef.current,
-      {
-        xPercent: 100,
-        duration: 0.7,
-        ease: "power4.inOut",
-      },
-      "<"
-    );
-
-    tl.to(containerRef.current, {
-      opacity: 0,
-      pointerEvents: "none",
-      duration: 0.2,
-    });
-
-    return () => {
-      tl.kill();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoaded) return null;
 
   return (
     <div
-      ref={containerRef}
-      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-black select-none"
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#080810]/95 backdrop-blur-2xl transition-all duration-500 ease-out select-none ${
+        isDone ? "opacity-0 pointer-events-none scale-105" : "opacity-100 scale-100"
+      }`}
     >
-      {/* Left & Right Split Curtains */}
-      <div
-        ref={curtainLeftRef}
-        className="absolute top-0 left-0 bottom-0 w-1/2 bg-[#050814] border-r border-[#22BDFD]/20 z-10"
-      />
-      <div
-        ref={curtainRightRef}
-        className="absolute top-0 right-0 bottom-0 w-1/2 bg-[#050814] border-l border-[#22BDFD]/20 z-10"
-      />
+      <div className="flex flex-col items-center justify-center p-8 text-center max-w-sm w-full space-y-6">
+        {/* Brand Icon with Glowing Ring & OK Badge */}
+        <div className="relative flex items-center justify-center">
+          {/* Glowing Aura */}
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 opacity-80 blur-md animate-pulse" />
 
-      {/* Main Center Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center px-6 text-center">
-        {/* Glowing Background Orbs */}
-        <div
-          ref={ring1Ref}
-          className="absolute w-72 h-72 rounded-full pointer-events-none opacity-40"
-          style={{
-            background: "radial-gradient(circle, rgba(34, 189, 253, 0.25) 0%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-        />
-        <div
-          ref={ring2Ref}
-          className="absolute w-96 h-96 rounded-full pointer-events-none opacity-30"
-          style={{
-            background: "radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%)",
-            filter: "blur(50px)",
-          }}
-        />
-
-        {/* Animated Brand Logo */}
-        <div ref={logoRef} className="flex flex-col items-center mb-8">
-          <div
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_50px_rgba(34,189,253,0.5)] border border-[#22BDFD]/40"
-            style={{
-              background: "linear-gradient(135deg, #22BDFD 0%, #0ea5e9 50%, #6366f1 100%)",
-            }}
-          >
-            <svg width="36" height="36" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M3 14L9 4L15 14"
-                stroke="white"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path d="M5.5 10H12.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+          <div className="relative w-20 h-20 rounded-2xl bg-slate-950 border border-cyan-500/40 flex items-center justify-center shadow-2xl transition-transform duration-300">
+            {isDone ? (
+              /* OK Checkmark when finished */
+              <div className="flex items-center justify-center animate-in zoom-in-75 duration-300">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              /* Logo Icon */
+              <svg width="42" height="42" viewBox="0 0 18 18" fill="none" className="animate-pulse">
+                <path
+                  d="M3 14L9 4L15 14"
+                  stroke="#22BDFD"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path d="M5.5 10H12.5" stroke="#22BDFD" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            )}
           </div>
+        </div>
 
+        {/* Brand Name */}
+        <div className="space-y-1">
           <h1
-            className="text-3xl sm:text-5xl font-black tracking-tight"
-            style={{
-              fontFamily: "var(--font-montserrat)",
-              background: "linear-gradient(135deg, #ffffff 20%, #22BDFD 60%, #a855f7 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
+            className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-cyan-300 to-purple-400 bg-clip-text text-transparent"
+            style={{ fontFamily: "var(--font-montserrat)" }}
           >
             Finovexa
           </h1>
-          <span className="text-xs sm:text-sm text-cyan-300/70 font-semibold tracking-widest uppercase mt-1">
-            AI Financial Platform
-          </span>
+          <p className="text-xs text-slate-400 font-medium tracking-wide">
+            {isDone ? "System OK — Ready" : "Loading Platform..."}
+          </p>
         </div>
 
-        {/* Progress Bar Container */}
-        <div className="w-64 sm:w-80 space-y-3">
-          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/10 backdrop-blur-md">
+        {/* Progress Bar */}
+        <div className="w-52 space-y-2">
+          <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800 shadow-inner">
             <div
-              ref={progressLineRef}
-              className="h-full rounded-full transition-all duration-75"
-              style={{
-                width: `${progress}%`,
-                background: "linear-gradient(90deg, #22BDFD 0%, #3b82f6 50%, #a855f7 100%)",
-                boxShadow: "0 0 15px rgba(34,189,253,0.8)",
-              }}
+              className="h-full rounded-full transition-all duration-150 ease-out bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 shadow-[0_0_12px_rgba(34,189,253,0.6)]"
+              style={{ width: `${progress}%` }}
             />
           </div>
-
-          {/* Percentage & Status Text */}
-          <div className="flex items-center justify-between text-xs font-mono text-gray-400">
-            <span ref={statusRef} className="text-cyan-400 font-sans font-medium">
-              {statusText}
-            </span>
-            <span ref={percentageRef} className="font-bold text-white text-sm">
-              {progress}%
-            </span>
+          <div className="flex justify-between items-center text-[11px] font-mono text-slate-400 px-1">
+            <span className="font-semibold text-slate-300">{isDone ? "OK" : "Loading"}</span>
+            <span className="font-bold text-cyan-400">{progress}%</span>
           </div>
         </div>
       </div>

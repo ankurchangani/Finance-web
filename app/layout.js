@@ -1,7 +1,7 @@
 import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/providers/toaster-provider";
 import { ThemeProvider } from "next-themes";
 import { dark } from "@clerk/themes";
 import GSAPProvider from "@/components/providers/gsap-provider";

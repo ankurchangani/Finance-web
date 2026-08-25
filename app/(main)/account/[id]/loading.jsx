@@ -57,6 +57,7 @@ export const TopBarLoader = memo(({ isLoading = true }) => {
     </>
   );
 });
+TopBarLoader.displayName = "TopBarLoader";
 
 // ─── Dashboard Bar Loader (inline – below heading) ───────────────────────────
 export const DashBarLoader = memo(() => (
@@ -75,6 +76,7 @@ export const DashBarLoader = memo(() => (
     </div>
   </>
 ));
+DashBarLoader.displayName = "DashBarLoader";
 
 // ─── Full-Page Overlay Loader ────────────────────────────────────────────────
 export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) => {
@@ -123,6 +125,7 @@ export const PageLoader = memo(({ isLoading = true, message = "Loading…" }) =>
     </>
   );
 });
+PageLoader.displayName = "PageLoader";
 
 // ─── Inline / Button Spinner ─────────────────────────────────────────────────
 export const SpinnerLoader = memo(({ size = 20, color = "#6366f1" }) => (
@@ -141,6 +144,7 @@ export const SpinnerLoader = memo(({ size = 20, color = "#6366f1" }) => (
     />
   </>
 ));
+SpinnerLoader.displayName = "SpinnerLoader";
 
 // ─── Default export: all-in-one ──────────────────────────────────────────────
 const Loading = memo(({ variant = "topbar", isLoading = true, message }) => {
@@ -149,5 +153,6 @@ const Loading = memo(({ variant = "topbar", isLoading = true, message }) => {
   if (variant === "dash")    return <DashBarLoader />;
   return <TopBarLoader isLoading={isLoading} />;
 });
+Loading.displayName = "Loading";
 
 export default Loading;

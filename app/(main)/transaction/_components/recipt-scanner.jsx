@@ -39,7 +39,7 @@ export function ReceiptScanner({ onScanComplete }) {
       // ✅ FIX 2: Removed duplicate toast — the form's handleScanComplete
       // already calls toast.success("Receipt auto-filled ✨")
     }
-  }, [scannedData, scanReceiptLoading]);
+  }, [scannedData, scanReceiptLoading, onScanComplete]);
 
   useEffect(() => {
     if (error) {

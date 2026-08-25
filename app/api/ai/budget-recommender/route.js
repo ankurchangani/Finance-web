@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-export async function POST(req) {
+export async function POST() {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -46,7 +46,7 @@ export async function POST(req) {
     const prompt = `
 You are a smart budget advisor. Based on this user's spending data, provide budget recommendations.
 
-Current Total Budget: $${userBudget?.amount || 5000}
+Current Total Budget: $${userBudget?.amount ? Number(userBudget.amount) : 5000}
 
 Spending by Category (Last 3 months):
 ${Object.entries(categoryStats)
@@ -68,7 +68,7 @@ Provide recommendations as a JSON array:
   }
 ]`;
 
-    const models = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
     let responseText = "";
 
     for (const modelName of models) {
@@ -120,18 +120,37 @@ Provide recommendations as a JSON array:
         db.budgetRecommendation.create({
           data: {
             userId: user.id,
-            category: rec.category || "General",
-            currentSpending: rec.current_spending || 0,
-            suggestedBudget: rec.suggested_budget || 0,
-            savingsPotential: rec.savings_potential || 0,
+            category: rec.category || rec.Category || "General",
+            currentSpending: rec.current_spending ?? rec.currentSpending ?? 0,
+            suggestedBudget: rec.suggested_budget ?? rec.suggestedBudget ?? 0,
+            savingsPotential: rec.savings_potential ?? rec.savingsPotential ?? 0,
             reason: rec.reason || "Optimized category recommendation.",
-            implementationTip: rec.implementation_tip || "Set a monthly target.",
+            implementationTip: rec.implementation_tip || rec.implementationTip || "Set a monthly target.",
           },
         })
       )
     );
 
-    return NextResponse.json(savedRecommendations);
+    const formatted = savedRecommendations.map((r) => {
+      const cSpend = r.currentSpending ? Number(r.currentSpending) : 0;
+      const sBudg = r.suggestedBudget ? Number(r.suggestedBudget) : 0;
+      const sPot = r.savingsPotential ? Number(r.savingsPotential) : 0;
+      return {
+        id: r.id,
+        category: r.category,
+        currentSpending: cSpend,
+        current_spending: cSpend,
+        suggestedBudget: sBudg,
+        suggested_budget: sBudg,
+        savingsPotential: sPot,
+        savings_potential: sPot,
+        reason: r.reason,
+        implementationTip: r.implementationTip,
+        implementation_tip: r.implementationTip,
+      };
+    });
+
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error("Budget Recommender Error:", error);
     return NextResponse.json(

@@ -1,12 +1,12 @@
-// app/components/ai-features/BudgetRecommender.tsx
 "use client"
+
 import { useState } from "react"
 import React from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, Target, DollarSign, LightbulbIcon } from "lucide-react"
+import { Loader2, Target, DollarSign, LightbulbIcon, ArrowUpRight } from "lucide-react"
 
 export function BudgetRecommender() {
   const [isLoading, setIsLoading] = useState(false)
@@ -16,23 +16,21 @@ export function BudgetRecommender() {
 
   useGSAP(() => {
     if (recommendations.length > 0 && containerRef.current) {
-      // Container animation
       gsap.fromTo(
         containerRef.current,
         { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.7, ease: "back.out" }
+        { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.2)" }
       )
 
-      // Items slide in from right
       gsap.fromTo(
         itemsRef.current,
-        { opacity: 0, x: 50, rotation: 5 },
+        { opacity: 0, x: 40, rotation: 3 },
         {
           opacity: 1,
           x: 0,
           rotation: 0,
           duration: 0.6,
-          stagger: 0.15,
+          stagger: 0.12,
           ease: "power3.out"
         }
       )
@@ -58,23 +56,27 @@ export function BudgetRecommender() {
 
   return (
     <div ref={containerRef} className="space-y-4">
-      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-amber-600" />
-            <CardTitle className="text-lg">Smart Budget Recommender</CardTitle>
+      <Card className="border border-slate-800 bg-slate-900/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-black/80 overflow-hidden">
+        <CardHeader className="pb-4 border-b border-slate-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <Target className="w-5 h-5" />
+            </div>
+            <CardTitle className="text-lg font-bold text-slate-100">
+              Smart Budget Recommender
+            </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 pt-5">
           <Button
             onClick={handleGetRecommendations}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800"
+            className="w-full py-6 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white shadow-xl shadow-amber-900/40 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
+                Generating Recommendations...
               </>
             ) : (
               <>
@@ -85,80 +87,87 @@ export function BudgetRecommender() {
           </Button>
 
           {recommendations.length > 0 && (
-            <div className="space-y-3 mt-4">
-              {recommendations.map((rec, idx) => (
-                <div
-                  key={idx}
-                  ref={el => {
-                    if (el) itemsRef.current[idx] = el
-                  }}
-                  className="p-4 bg-white rounded-lg border border-amber-100 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {rec.category}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">{rec.reason}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-amber-600">
-                        Save ${rec.savings_potential.toFixed(2)}
+            <div className="space-y-4 mt-5">
+              {recommendations.map((rec, idx) => {
+                const savingsPotential = Number(rec.savings_potential ?? rec.savingsPotential ?? 0);
+                const currentSpending = Number(rec.current_spending ?? rec.currentSpending ?? 0);
+                const suggestedBudget = Number(rec.suggested_budget ?? rec.suggestedBudget ?? 0);
+                const tip = rec.implementation_tip || rec.implementationTip || "";
+                const savePct = currentSpending > 0 ? ((savingsPotential / currentSpending) * 100).toFixed(0) : "0";
+
+                return (
+                  <div
+                    key={idx}
+                    ref={el => {
+                      if (el) itemsRef.current[idx] = el
+                    }}
+                    className="p-5 bg-slate-800/60 rounded-2xl border border-slate-700/60 backdrop-blur-md hover:border-amber-500/30 transition-all duration-300 shadow-lg"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-bold text-base text-slate-100 capitalize">
+                          {rec.category}
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{rec.reason}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0 ml-3">
+                        <span className="inline-flex items-center text-xs font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">
+                          Save ${savingsPotential.toFixed(2)}
+                        </span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    <div className="bg-red-50 p-2 rounded">
-                      <p className="text-xs text-gray-500 mb-0.5">Current</p>
-                      <p className="text-sm font-bold text-red-600">
-                        ${rec.current_spending.toFixed(0)}
-                      </p>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-rose-950/40 border border-rose-500/20 p-3 rounded-xl">
+                        <p className="text-[10px] uppercase font-bold text-rose-400 tracking-wider mb-1">Current</p>
+                        <p className="text-base font-extrabold text-slate-100">
+                          ${currentSpending.toFixed(0)}
+                        </p>
+                      </div>
+                      <div className="bg-blue-950/40 border border-blue-500/20 p-3 rounded-xl">
+                        <p className="text-[10px] uppercase font-bold text-blue-400 tracking-wider mb-1">Suggested</p>
+                        <p className="text-base font-extrabold text-slate-100">
+                          ${suggestedBudget.toFixed(0)}
+                        </p>
+                      </div>
+                      <div className="bg-emerald-950/40 border border-emerald-500/20 p-3 rounded-xl">
+                        <p className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider mb-1">Potential</p>
+                        <p className="text-base font-extrabold text-emerald-400 flex items-center">
+                          {savePct}% <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-2 rounded">
-                      <p className="text-xs text-gray-500 mb-0.5">Suggested</p>
-                      <p className="text-sm font-bold text-blue-600">
-                        ${rec.suggested_budget.toFixed(0)}
-                      </p>
-                    </div>
-                    <div className="bg-green-50 p-2 rounded">
-                      <p className="text-xs text-gray-500 mb-0.5">Save</p>
-                      <p className="text-sm font-bold text-green-600">
-                        {(
-                          (rec.savings_potential / rec.current_spending) *
-                          100
-                        ).toFixed(0)}
-                        %
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="p-2 bg-blue-50 rounded border border-blue-100">
-                    <div className="flex items-start gap-2">
-                      <LightbulbIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-blue-800">
-                        {rec.implementation_tip}
-                      </p>
-                    </div>
+                    {tip && (
+                      <div className="p-3 bg-blue-950/30 rounded-xl border border-blue-500/20 flex items-start gap-2.5">
+                        <LightbulbIcon className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs font-medium text-slate-300 leading-relaxed">
+                          {tip}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              <div className="p-3 bg-gradient-to-r from-green-50 to-transparent rounded-lg border border-green-200 mt-4">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-green-600" />
+              <div className="p-5 bg-gradient-to-r from-emerald-950/50 via-slate-800/80 to-slate-900/60 rounded-2xl border border-emerald-500/30 backdrop-blur-md mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                    <DollarSign className="w-6 h-6" />
+                  </div>
                   <div>
-                    <p className="text-xs text-gray-600">
-                      Monthly Savings Potential
+                    <p className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-0.5">
+                      Total Monthly Savings Potential
                     </p>
-                    <p className="text-xl font-bold text-green-600">
-                      $
-                      {recommendations
-                        .reduce((sum, r) => sum + r.savings_potential, 0)
-                        .toFixed(2)}
-                    </p>
+                    <p className="text-xs text-slate-400">Sum of optimized category budgets</p>
                   </div>
                 </div>
+                <p className="text-2xl font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl">
+                  $
+                  {recommendations
+                    .reduce((sum, r) => sum + Number(r.savings_potential ?? r.savingsPotential ?? 0), 0)
+                    .toFixed(2)}
+                </p>
               </div>
             </div>
           )}

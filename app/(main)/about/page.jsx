@@ -19,7 +19,7 @@ function useReveal(ref, opts = {}) {
         duration: opts.duration ?? 0.8, ease: opts.ease ?? "power3.out", delay: opts.delay ?? 0,
         scrollTrigger: { trigger: ref.current, start: "top 84%", toggleActions: "play none none reverse" } }
     );
-  }, []);
+  }, [ref, opts.y, opts.rotateX, opts.duration, opts.ease, opts.delay]);
 }
 
 const AboutPage = () => {

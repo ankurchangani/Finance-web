@@ -32,7 +32,6 @@ import {
 import { cn }              from "@/lib/utils";
 import { categoryColors }  from "@/data/categories";
 import { bulkDeleteTransactions } from "@/actions/account";
-import { TransactionTableSkeleton } from "@/components/ui/skeleton-loaders";
 
 function exportTransactionsCSV(transactions) {
   if (!transactions || transactions.length === 0) return "";
@@ -106,7 +105,7 @@ export function TransactionTablePaginated({
       if (localSearch !== search) updateParams({ search: localSearch });
     }, 400);
     return () => clearTimeout(t);
-  }, [localSearch]);
+  }, [localSearch, search, updateParams]);
 
   const handleSort = (field) => {
     updateParams({
@@ -292,7 +291,7 @@ export function TransactionTablePaginated({
           <div className="flex flex-wrap gap-1.5">
             {search && (
               <Badge variant="secondary" className="gap-1 text-xs">
-                Search: "{search}"
+                Search: &quot;{search}&quot;
                 <X className="h-3 w-3 cursor-pointer" onClick={() => { setLocalSearch(""); updateParams({ search: "" }); }} />
               </Badge>
             )}

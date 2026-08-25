@@ -223,7 +223,18 @@ export async function getUserTransactions(query = {}) {
       },
     });
 
-    return { success: true, data: transactions };
+    const serializedTransactions = transactions.map((t) => ({
+      ...t,
+      amount: t.amount ? Number(t.amount) : 0,
+      account: t.account
+        ? {
+            ...t.account,
+            balance: t.account.balance ? Number(t.account.balance) : 0,
+          }
+        : null,
+    }));
+
+    return { success: true, data: serializedTransactions };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -252,9 +263,9 @@ export async function scanReceipt(formData) {
 
     // ✅ AI models fallback system
     const models = [
-      "gemini-2.5-flash-lite",
-      "gemini-2.0-flash-lite",
+      "gemini-1.5-flash",
       "gemini-2.0-flash",
+      "gemini-1.5-pro",
     ];
 
     const prompt = `

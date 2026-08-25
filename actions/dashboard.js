@@ -14,6 +14,15 @@
   };
 
   async function getOrCreateUser(userId) {
+    // 1. Fast path: If user exists in DB, return immediately
+    const existing = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (existing) {
+      return existing;
+    }
+
+    // 2. Slow path (First-time sign in): Fetch Clerk profile & sync/create DB record
     const clerkUser = await currentUser();
     if (!clerkUser) throw new Error("Clerk user not found");
 
@@ -23,18 +32,6 @@
     const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
     const imageUrl = clerkUser.imageUrl;
 
-    // Step 1: clerkUserId થી શોધો
-    const byClerk = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-    if (byClerk) {
-      return await db.user.update({
-        where: { clerkUserId: userId },
-        data: { name, imageUrl },
-      });
-    }
-
-    
     const byEmail = await db.user.findUnique({
       where: { email },
     });
@@ -45,7 +42,6 @@
       });
     }
 
-    // Step 3: નવો user બનાવો
     return await db.user.create({
       data: { clerkUserId: userId, email, name, imageUrl },
     });

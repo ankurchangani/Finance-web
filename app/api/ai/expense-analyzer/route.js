@@ -58,7 +58,7 @@ Provide a JSON response with:
   "savings_opportunity": "Dollar amount that could be saved"
 }`;
 
-    const models = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
     let responseText = "";
 
     for (const modelName of models) {
@@ -72,21 +72,25 @@ Provide a JSON response with:
       }
     }
 
-    if (!responseText) {
-      return NextResponse.json(
-        {
-          insight: "Regular expense transaction analyzed.",
-          category_match: "yes",
-          anomaly_detected: "no",
-          recommendation: "Keep tracking your recurring expenses for optimum control.",
-          savings_opportunity: "0",
-        },
-        { status: 200 }
-      );
-    }
+    const fallbackAnalysis = {
+      insight: "Regular expense transaction analyzed.",
+      category_match: "yes",
+      anomaly_detected: "no",
+      recommendation: "Keep tracking your recurring expenses for optimum control.",
+      savings_opportunity: "0",
+    };
 
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    const analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+    let analysis = fallbackAnalysis;
+    if (responseText) {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          analysis = { ...fallbackAnalysis, ...JSON.parse(jsonMatch[0]) };
+        } catch (e) {
+          console.error("Failed to parse expense analysis JSON", e);
+        }
+      }
+    }
 
     const savedAnalysis = await db.aIAnalysis.create({
       data: {
@@ -101,7 +105,10 @@ Provide a JSON response with:
       },
     });
 
-    return NextResponse.json(savedAnalysis);
+    return NextResponse.json({
+      ...savedAnalysis,
+      metadata: analysis,
+    });
   } catch (error) {
     console.error("AI Analyzer Error:", error);
     return NextResponse.json({ error: error.message || "Analysis failed" }, { status: 500 });
