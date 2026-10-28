@@ -28,10 +28,10 @@ export default async function AccountPage({ params }) {
         </div>
         <div className="text-right pb-2">
           <div className="text-xl sm:text-2xl font-bold">
-            ${parseFloat(account.balance).toFixed(2)}
+            ₹{Number(account.balance || 0).toFixed(2)}
           </div>
           <p className="text-sm text-muted-foreground">
-            {account._count.transactions} Transactions
+            {account._count?.transactions || (transactions?.length ?? 0)} Transactions
           </p>
         </div>
       </div>

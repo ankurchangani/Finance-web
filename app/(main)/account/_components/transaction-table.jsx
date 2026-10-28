@@ -304,7 +304,9 @@ export function TransactionTable({ transactions }) {
 
                   {/* Date */}
                   <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(t.date), "PP")}
+                    {t.date && !isNaN(new Date(t.date).getTime())
+                      ? format(new Date(t.date), "PP")
+                      : "—"}
                   </TableCell>
 
                   {/* Description */}

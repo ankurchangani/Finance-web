@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, Loader2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -93,22 +93,43 @@ export function AddTransactionForm({
     }
   };
 
-  const handleScanComplete = (scannedData) => {
-    if (!scannedData) return;
-    setValue("amount", scannedData.amount.toString());
-    setValue("date", new Date(scannedData.date));
-    if (scannedData.description) setValue("description", scannedData.description);
+  const hasHandledSuccessRef = useRef(false);
+
+  const handleScanComplete = useCallback((scannedData) => {
+    if (!scannedData || Object.keys(scannedData).length === 0) return;
+    if (scannedData.amount !== undefined && scannedData.amount !== null && scannedData.amount !== "") {
+      setValue("amount", scannedData.amount.toString(), { shouldValidate: true });
+    }
+    if (scannedData.date) {
+      const parsed = new Date(scannedData.date);
+      setValue("date", !isNaN(parsed.getTime()) ? parsed : new Date(), { shouldValidate: true });
+    } else {
+      setValue("date", new Date(), { shouldValidate: true });
+    }
+    if (scannedData.description) {
+      setValue("description", scannedData.description, { shouldValidate: true });
+    }
     if (scannedData.category) {
+      const target = scannedData.category.toLowerCase().trim();
       const matchedCategory = categories.find(
-        (cat) => cat.name.toLowerCase() === scannedData.category.toLowerCase()
+        (cat) =>
+          cat.name.toLowerCase() === target ||
+          cat.id.toLowerCase() === target ||
+          cat.subcategories?.some((s) => s.toLowerCase() === target)
       );
-      if (matchedCategory) setValue("category", matchedCategory.id);
+      if (matchedCategory) {
+        if (matchedCategory.type) {
+          setValue("type", matchedCategory.type, { shouldValidate: true });
+        }
+        setValue("category", matchedCategory.id, { shouldValidate: true });
+      }
     }
     toast.success("Receipt auto-filled ✨");
-  };
+  }, [categories, setValue]);
 
   useEffect(() => {
-    if (transactionResult?.success && !transactionLoading) {
+    if (transactionResult?.success && !transactionLoading && !hasHandledSuccessRef.current) {
+      hasHandledSuccessRef.current = true;
       toast.success(
         editMode ? "Transaction updated successfully" : "Transaction created successfully"
       );
@@ -205,8 +226,8 @@ export function AddTransactionForm({
           Account
         </label>
         <Select
-          onValueChange={(value) => setValue("accountId", value)}
-          defaultValue={getValues("accountId")}
+          onValueChange={(value) => setValue("accountId", value, { shouldValidate: true })}
+          value={watch("accountId") || ""}
         >
           <SelectTrigger className="h-11 border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors">
             <SelectValue placeholder="Select account" />
@@ -243,8 +264,8 @@ export function AddTransactionForm({
           Category
         </label>
         <Select
-          onValueChange={(value) => setValue("category", value)}
-          defaultValue={getValues("category")}
+          onValueChange={(value) => setValue("category", value, { shouldValidate: true })}
+          value={watch("category") || ""}
         >
           <SelectTrigger className="h-11 border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors">
             <SelectValue placeholder="Select category" />
@@ -279,7 +300,11 @@ export function AddTransactionForm({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                {date && !isNaN(new Date(date).getTime()) ? (
+                  format(new Date(date), "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">

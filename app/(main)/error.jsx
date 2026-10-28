@@ -22,6 +22,11 @@ export default function MainRouteError({ error, reset }) {
           <p className="text-xs text-slate-400 leading-relaxed">
             There was a temporary issue fetching data for this section.
           </p>
+          {error?.message && (
+            <p className="text-[11px] text-amber-300/80 font-mono bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/20 max-w-sm mx-auto overflow-auto text-left mt-2">
+              {error.message}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3 pt-2">

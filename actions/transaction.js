@@ -241,6 +241,50 @@ export async function getUserTransactions(query = {}) {
 }
 
 
+// Helper to determine if an error is unrecoverable across all models
+function isUnrecoverableGeminiError(err) {
+  const status = err?.status;
+  const message = (err?.message || "").toLowerCase();
+
+  // Invalid API key
+  if (
+    status === 400 &&
+    (message.includes("api_key_invalid") || message.includes("api key not valid"))
+  ) {
+    return {
+      unrecoverable: true,
+      userMessage: "Invalid Gemini API key. Please check your GEMINI_API_KEY in .env.",
+    };
+  }
+
+  // Permission / Auth issues
+  if (
+    status === 401 ||
+    status === 403 ||
+    message.includes("permission_denied") ||
+    message.includes("unauthorized")
+  ) {
+    return {
+      unrecoverable: true,
+      userMessage: "Gemini API access denied. Please verify your project permissions.",
+    };
+  }
+
+  // Account quota exhausted
+  if (
+    status === 429 ||
+    message.includes("resource_exhausted") ||
+    message.includes("quota")
+  ) {
+    return {
+      unrecoverable: true,
+      userMessage: "Gemini API quota exceeded. Please try again in a few moments.",
+    };
+  }
+
+  return { unrecoverable: false };
+}
+
 export async function scanReceipt(formData) {
   try {
     const file = formData.get("file");
@@ -258,14 +302,28 @@ export async function scanReceipt(formData) {
       throw new Error("File size must be under 5MB");
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is missing in your .env file");
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+
     const arrayBuffer = await file.arrayBuffer();
     const base64String = Buffer.from(arrayBuffer).toString("base64");
 
-    // ✅ AI models fallback system
+    // Normalize MIME type
+    let mimeType = file.type || "image/jpeg";
+    if (mimeType === "image/jpg") mimeType = "image/jpeg";
+
+    // Confirmed model list supporting generateContent and multimodal image input
     const models = [
-      "gemini-1.5-flash",
-      "gemini-2.0-flash",
-      "gemini-1.5-pro",
+      "gemini-3.8-flash",      // 1. Primary Model
+      "gemini-3.5-flash",      // 2. Fallback
+      "gemini-3.5-flash-lite", // 3. Fallback
+      "gemini-2.5-flash",      // 4. Fallback
+      "gemini-2.5-flash-lite", // 5. Fallback
+      "gemini-flash-latest",   // 6. Fallback
     ];
 
     const prompt = `
@@ -290,10 +348,10 @@ If this is not a receipt, return exactly: {}
 `;
     let text = "";
 
-    // ✅ Try models one by one
+    // Iterate through models with recoverable-only fallback
     for (const modelName of models) {
       try {
-        console.log("Trying model:", modelName);
+        console.log(`[scanReceipt] Attempting receipt scan with model: ${modelName}`);
 
         const model = genAI.getGenerativeModel({
           model: modelName,
@@ -302,7 +360,7 @@ If this is not a receipt, return exactly: {}
         const result = await model.generateContent([
           {
             inlineData: {
-              mimeType: file.type,
+              mimeType,
               data: base64String,
             },
           },
@@ -313,28 +371,37 @@ If this is not a receipt, return exactly: {}
         text = response.text();
 
         // Success
-        if (text) {
-          console.log("Success with:", modelName);
+        if (text && text.trim().length > 0) {
+          console.log(`[scanReceipt] Successfully processed receipt with model: ${modelName}`);
           break;
         }
       } catch (err) {
-        console.log(`Model ${modelName} failed`);
+        // Fast-fail if error is unrecoverable across models
+        const check = isUnrecoverableGeminiError(err);
+        if (check.unrecoverable) {
+          console.error(`[scanReceipt] Unrecoverable error with model ${modelName} (${err?.status || "error"}):`, err?.message);
+          throw new Error(check.userMessage);
+        }
 
-        // Continue to next model
+        // Recoverable model error (e.g. 503 high demand, 500, 404, or transient issue)
+        console.warn(`[scanReceipt] Model ${modelName} encountered recoverable error (${err?.status || "error"}), attempting next model...`);
         continue;
       }
     }
 
-    // No AI response
+    // No AI response from any model
     if (!text) {
-      throw new Error("All Gemini models failed");
+      throw new Error(
+        "Receipt scan failed: Gemini AI models could not process this image. Please check your image clarity or try another receipt."
+      );
     }
 
-    // Extract JSON
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Extract JSON (strip markdown code fences if present)
+    const cleanedText = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
-      console.error("No JSON found:", text);
+      console.error("[scanReceipt] No valid JSON found in model output");
       return {};
     }
 
@@ -343,7 +410,7 @@ If this is not a receipt, return exactly: {}
     try {
       data = JSON.parse(jsonMatch[0]);
     } catch (err) {
-      console.error("JSON parse error:", err);
+      console.error("[scanReceipt] JSON parse error:", err);
       return {};
     }
 
@@ -351,15 +418,24 @@ If this is not a receipt, return exactly: {}
       return {};
     }
 
+    // Ensure date is valid and safe for date-fns parsing
+    let validDate = new Date().toISOString();
+    if (data.date) {
+      const parsed = new Date(data.date);
+      if (!isNaN(parsed.getTime())) {
+        validDate = parsed.toISOString();
+      }
+    }
+
     return {
       amount: Number(data.amount) || 0,
-      date: data.date || new Date().toISOString(),
-      description: data.description || "",
+      date: validDate,
+      description: data.description || data.merchantName || "",
       merchantName: data.merchantName || "",
       category: data.category || "other-expense",
     };
   } catch (error) {
-    console.error("scanReceipt error:", error);
+    console.error("[scanReceipt] Processing error:", error.message);
 
     if (error.message.includes("429")) {
       throw new Error("AI quota exceeded. Try again later.");

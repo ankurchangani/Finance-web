@@ -58,7 +58,7 @@ Provide a JSON response with:
   "savings_opportunity": "Dollar amount that could be saved"
 }`;
 
-    const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
+    const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-1.5-flash"];
     let responseText = "";
 
     for (const modelName of models) {

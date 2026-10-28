@@ -1,8 +1,7 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-[#080810] text-white relative overflow-hidden">
-
-      {/* Background blobs */}
+    <div className="min-h-screen bg-[#080810] text-white relative overflow-hidden pt-24 pb-20">
+      {/* Background ambient glowing orbs */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-violet-600/8 blur-[130px]" />
         <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full bg-blue-600/8 blur-[110px]" />
@@ -17,15 +16,30 @@ export default function Loading() {
           background: linear-gradient(
             90deg,
             rgba(255,255,255,0.03) 25%,
-            rgba(255,255,255,0.07) 50%,
+            rgba(255,255,255,0.08) 50%,
             rgba(255,255,255,0.03) 75%
           );
           background-size: 600px 100%;
-          animation: shimmer 1.8s infinite linear;
+          animation: shimmer 1.6s infinite linear;
         }
       `}</style>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 mt-24 space-y-12">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 py-6 space-y-10">
+
+        {/* ── Top Header Banner with Live AI Pulse ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+              Loading AI Intelligence...
+            </div>
+            <div className="h-8 w-64 rounded-xl sk" />
+            <div className="h-4 w-96 rounded-lg sk opacity-60" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-28 rounded-xl sk border border-violet-500/20" />
+          </div>
+        </div>
 
         {/* ── Section: Select Account ── */}
         <div>
@@ -117,7 +131,7 @@ export default function Loading() {
 
         {/* ── Section: Financial Health Score ── */}
         <div>
-          <SectionHeader iconBg="bg-red-500/10" iconBorder="border-red-500/20" titleW="w-52" subW="w-48" badge />
+          <SectionHeader iconBg="bg-red-500/10" iconBorder="border-red-500/20" titleW="w-52" subW="w-48" badge="Live" />
           <div className="flex items-center gap-6 mt-5">
             <div className="w-24 h-24 rounded-full sk flex-shrink-0" />
             <div className="space-y-2 flex-1">
@@ -147,10 +161,10 @@ export default function Loading() {
 
         {/* ── Section: AI Insights ── */}
         <div>
-          <SectionHeader iconBg="bg-violet-500/10" iconBorder="border-violet-500/20" titleW="w-28" subW="w-56" badge />
+          <SectionHeader iconBg="bg-violet-500/10" iconBorder="border-violet-500/20" titleW="w-28" subW="w-56" badge="AI" />
 
           {/* Generate button skeleton */}
-          <div className="h-14 w-52 rounded-2xl sk mt-5 mb-8" />
+          <div className="h-14 w-56 rounded-2xl sk mt-5 mb-8 border border-violet-500/20" />
 
           {/* Insight cards skeleton */}
           <div className="grid md:grid-cols-2 gap-4">
@@ -173,7 +187,7 @@ export default function Loading() {
 }
 
 // ── Reusable Section Header Skeleton ──
-function SectionHeader({ iconBg, iconBorder, titleW, subW, badge = false }) {
+function SectionHeader({ iconBg, iconBorder, titleW, subW, badge }) {
   return (
     <div className="flex items-start justify-between">
       <div className="flex items-center gap-3">
@@ -184,7 +198,7 @@ function SectionHeader({ iconBg, iconBorder, titleW, subW, badge = false }) {
         </div>
       </div>
       {badge && (
-        <div className="h-6 w-16 rounded-full sk" />
+        <div className="h-6 w-16 rounded-full sk border border-violet-500/20" />
       )}
     </div>
   );

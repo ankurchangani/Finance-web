@@ -129,23 +129,23 @@ export function AccountChart({ transactions }) {
       ? startOfDay(subDays(now, range.days))
       : startOfDay(new Date(0));
 
-    const filtered = transactions.filter(
-      (t) =>
-        new Date(t.date) >= startDate &&
-        new Date(t.date) <= endOfDay(now)
-    );
+    const validTxs = (transactions || []).filter((t) => {
+      if (!t || !t.date) return false;
+      const d = new Date(t.date);
+      return !isNaN(d.getTime()) && d >= startDate && d <= endOfDay(now);
+    });
 
-    const grouped = filtered.reduce((acc, t) => {
-      const date = format(new Date(t.date), "MMM dd");
-      if (!acc[date]) acc[date] = { date, income: 0, expense: 0 };
-      if (t.type === "INCOME") acc[date].income  += t.amount;
-      else                      acc[date].expense += t.amount;
+    const grouped = validTxs.reduce((acc, t) => {
+      const d = new Date(t.date);
+      const date = format(d, "MMM dd");
+      if (!acc[date]) acc[date] = { date, income: 0, expense: 0, rawDate: d.getTime() };
+      const amt = Number(t.amount) || 0;
+      if (t.type === "INCOME") acc[date].income  += amt;
+      else                      acc[date].expense += amt;
       return acc;
     }, {});
 
-    return Object.values(grouped).sort(
-      (a, b) => new Date(a.date) - new Date(b.date)
-    );
+    return Object.values(grouped).sort((a, b) => a.rawDate - b.rawDate);
   }, [transactions, dateRange]);
 
   const totals = useMemo(

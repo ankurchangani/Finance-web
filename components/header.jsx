@@ -62,7 +62,7 @@ const AuthToggle = () => {
 };
 
 const MobileIconBtn = ({ href, children }) => (
-  <Link href={href}>
+  <Link href={href} prefetch={true}>
     <div className="inline-flex items-center justify-center rounded-xl h-9 w-9 hover:text-[#22BDFD] hover:bg-[#22BDFD]/10 hover:border-[#22BDFD]/40 border transition-all duration-300"
       style={{ background: "var(--icon-btn-bg)", borderColor: "var(--icon-btn-border)", color: "var(--icon-btn-color)" }}>
       {children}
@@ -89,7 +89,7 @@ const NavBtn = ({ href, icon: Icon, label, gradient, glowColor, border, textColo
   const click = () => gsap.to(btnRef.current, { scale: 0.93, duration: 0.1, yoyo: true, repeat: 1 });
 
   return (
-    <Link href={href}>
+    <Link href={href} prefetch={true}>
       <div ref={btnRef} onMouseEnter={hoverIn} onMouseLeave={hoverOut} onClick={click}
         className="relative flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer overflow-hidden"
         style={{ background: gradient, border, color: textColor, fontFamily: "var(--font-poppins)", fontSize: "0.8rem", fontWeight: 600 }}>
@@ -121,7 +121,7 @@ const AddBtn = () => {
   };
 
   return (
-    <Link href="/transaction/create">
+    <Link href="/transaction/create" prefetch={true}>
       <div ref={btnRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick}
         className="relative flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer overflow-hidden"
         style={{ background: "linear-gradient(135deg, #22BDFD 0%, #0ea5e9 100%)", boxShadow: "0 0 16px rgba(34,189,253,0.35)", color: "#fff", fontFamily: "var(--font-poppins)", fontSize: "0.8rem", fontWeight: 600 }}>
@@ -190,7 +190,6 @@ const Header = () => {
   // ── All signed-in nav buttons ──────────────────────────────────────────────
   const signedInBtns = [
     { href: "/dashboard",     icon: LayoutDashboard, label: "Dashboard",  gradient: "linear-gradient(135deg,rgba(34,189,253,0.12),rgba(14,165,233,0.08))", glowColor: "rgba(34,189,253,0.45)", border: "1px solid rgba(34,189,253,0.3)", textColor: "#22BDFD" },
-
     { href: "/ai-insights",   icon: Sparkles,        label: "AI Insights", gradient: "linear-gradient(135deg,rgba(168,85,247,0.12),rgba(139,92,246,0.08))", glowColor: "rgba(168,85,247,0.4)",  border: "1px solid rgba(168,85,247,0.3)", textColor: "#a855f7" },
   ];
 
